@@ -209,3 +209,9 @@ Temporary Items
 pyvenv.cfg
 .venv
 pip-selfcheck.json
+data/ratings.csv
+data/tags.csv
+data/movies.csv
+data/links.csv
+data/checksums.txt
+data/README.txt
