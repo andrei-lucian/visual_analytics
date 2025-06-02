@@ -18,7 +18,7 @@ class ScatterPlot(html.Div):
         color_map = px.colors.qualitative.Plotly
         colors = [color_map[i % len(color_map)] for i in range(len(unique_genres))]
         genre_color_dict = dict(zip(unique_genres, colors))
-        point_colors = merged_df["PrimaryGenre"].map(genre_color_dict)
+        point_colors = data_df["PrimaryGenre"].map(genre_color_dict)
 
         figure = {
             "data": [
@@ -28,7 +28,7 @@ class ScatterPlot(html.Div):
                     "mode": "markers",
                     "marker": {"size": 12, "color": point_colors},
                     "type": "scatter",
-                    "text": df["Title_x"],  # hover info
+                    "text": df["Title"],  # hover info
                     "hoverinfo": "text",
                 }
             ],

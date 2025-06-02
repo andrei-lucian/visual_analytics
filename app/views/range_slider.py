@@ -20,7 +20,7 @@ class YearRangeSlider(html.Div):
                     min=min_year,
                     max=max_year,
                     step=1,
-                    value=[min_year, max_year],
+                    value=[2010, 2025],
                     marks=None,
                     tooltip={"placement": "bottom", "always_visible": True},
                     allowCross=False,

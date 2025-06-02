@@ -18,7 +18,7 @@ class Dropdown(html.Div):
                     id=self.html_id,
                     options=options,
                     multi=True,
-                    value=options[0],
+                    value=[options[0], options[3]],
                     clearable=False,
                     style={
                         "backgroundColor": "#1e1e1e",
