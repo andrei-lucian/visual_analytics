@@ -1,0 +1,54 @@
+# --- App Layout ---
+from dash import html
+
+from widgets.knowledge_graph import *
+from widgets.dropdown import *
+
+# --- Styles ---
+sidebar_style = {
+    "width": "20%",
+    "backgroundColor": "#f0f0f0",
+    "padding": "20px",
+    "boxShadow": "2px 0px 5px rgba(0,0,0,0.1)",
+}
+scatter_style = {
+    "width": "80%",
+    "display": "flex",
+    "flexDirection": "column",
+    "height": "100vh",
+    "overflow": "hidden",
+}
+center_style = {
+    "width": "85%",
+    "display": "flex",
+    "flexDirection": "column",
+    "padding": "10px",
+}
+bottom_content_style = {
+    "marginTop": "20px",
+    "backgroundColor": "#26232C",
+    "color": "white",
+    "padding": "15px",
+    "height": "200px",
+}
+main_content_style = {
+    "display": "flex",
+    "flexDirection": "row",
+    "height": "100vh",
+}
+
+knowledge_graph = KnowledgeGraphPlot(
+    json_path="data/mc1.json",
+    html_id="graph",
+)
+edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
+
+
+def create_layout():
+    layout = html.Div(
+        style=main_content_style,
+        children=[
+            html.Div(style=scatter_style, children=[edge_type_dropdown.render(), knowledge_graph.render()]),
+        ],
+    )
+    return layout
