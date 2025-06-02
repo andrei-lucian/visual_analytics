@@ -56,8 +56,9 @@ main_content_style = {
 #     y_col="Title",
 #     top_n=10,
 # )
-scatter_plot = ScatterPlot(df=data_df, name="Scatter")
+
 genre_dropdown = Dropdown("Genre Dropdown", unique_genres)
+scatter_plot = ScatterPlot(df=data_df, name="Scatter")
 year_slider = YearRangeSlider(name="Year Slider", df=data_df)
 stream_graph = StreamGraph(genre_pivot)
 line_plot = LinePlot(genre_year_avg_rating)

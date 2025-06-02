@@ -17,17 +17,18 @@ def register_callbacks(app):
             Input(genre_dropdown.html_id, "value"),  # now a list
             Input(year_slider.html_id, "value"),
         ],
+        prevent_initial_call=False,
     )
     def update_scatter(selected_genres, year_range):
         min_year, max_year = year_range
 
         # Handle no genre selected
         if not selected_genres:
-            genre_filtered_df = merged_df.copy()
+            genre_filtered_df = data_df.copy()
         else:
             # Build regex pattern to match any selected genre
             pattern = "|".join([rf"\b{genre}\b" for genre in selected_genres])
-            genre_filtered_df = merged_df[merged_df["Genre"].str.contains(pattern, case=False, na=False)]
+            genre_filtered_df = data_df[data_df["Genre"].str.contains(pattern, case=False, na=False)]
 
         # Filter by year
         filtered_df = genre_filtered_df[
@@ -36,7 +37,7 @@ def register_callbacks(app):
 
         # Build color mapping
         color_map = px.colors.qualitative.Plotly
-        all_genres = sorted(set(g.strip() for sublist in merged_df["Genre"].dropna().str.split(",") for g in sublist))
+        all_genres = sorted(set(g.strip() for sublist in data_df["Genre"].dropna().str.split(",") for g in sublist))
         genre_color_dict = {genre: color_map[i % len(color_map)] for i, genre in enumerate(all_genres)}
 
         # Choose first matched genre for coloring
@@ -78,6 +79,7 @@ def register_callbacks(app):
     @app.callback(
         Output(stream_graph.html_id, "figure"),
         Input(genre_dropdown.html_id, "value"),  # value might be str or list
+        prevent_initial_call=False,
     )
     def update_streamgraph(selected_genres):
         # If nothing selected, show all genres
@@ -94,8 +96,7 @@ def register_callbacks(app):
 
     # Line plot
     @app.callback(
-        Output(line_plot.html_id, "figure"),
-        Input(genre_dropdown.html_id, "value"),
+        Output(line_plot.html_id, "figure"), Input(genre_dropdown.html_id, "value"), prevent_initial_call=False
     )
     def update_lineplot(selected_genres):
         return line_plot.create_figure(genre_year_avg_rating, selected_genres)
