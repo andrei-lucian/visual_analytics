@@ -3,6 +3,7 @@ from dash import html
 
 from widgets.knowledge_graph import *
 from widgets.parallel_coordinates import *
+from widgets.heatmap import *
 from widgets.dropdown import *
 
 # --- Styles ---
@@ -42,16 +43,31 @@ knowledge_graph = KnowledgeGraphPlot(
     json_path="data/mc1.json",
     html_id="graph",
 )
-
 parallel_coordinates = ParallelCoordinatesPlot(json_path="data/mc1.json", html_id="pcp")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
+heatmap = Heatmap(json_path="data/mc1.json", html_id="heatmap")
 
 
 def create_layout():
     layout = html.Div(
-        style=main_content_style,
+        style={"display": "flex", "flexDirection": "row", "width": "100%", "height": "100%"},
         children=[
-            html.Div(style=scatter_style, children=[edge_type_dropdown.render(), knowledge_graph.render(), parallel_coordinates.render()]),
+            # Left side (67%)
+            html.Div(
+                style={"width": "67%", "padding": "10px"},
+                children=[
+                    edge_type_dropdown.render(),
+                    knowledge_graph.render(),
+                    parallel_coordinates.render(),
+                ],
+            ),
+            # Right side (33%) for heatmap
+            html.Div(
+                style={"width": "33%", "padding": "10px"},
+                children=[
+                    dcc.Graph(id="heatmap"),
+                ],
+            ),
         ],
     )
     return layout
