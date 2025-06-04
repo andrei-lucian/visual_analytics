@@ -2,6 +2,7 @@
 from dash import html
 
 from widgets.knowledge_graph import *
+from widgets.parallel_coordinates import *
 from widgets.dropdown import *
 
 # --- Styles ---
@@ -41,6 +42,8 @@ knowledge_graph = KnowledgeGraphPlot(
     json_path="data/mc1.json",
     html_id="graph",
 )
+
+parallel_coordinates = ParallelCoordinatesPlot(json_path="data/mc1.json", html_id="pcp")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 
 
@@ -48,7 +51,7 @@ def create_layout():
     layout = html.Div(
         style=main_content_style,
         children=[
-            html.Div(style=scatter_style, children=[edge_type_dropdown.render(), knowledge_graph.render()]),
+            html.Div(style=scatter_style, children=[edge_type_dropdown.render(), knowledge_graph.render(), parallel_coordinates.render()]),
         ],
     )
     return layout

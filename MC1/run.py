@@ -17,6 +17,6 @@ if __name__ == "__main__":
     """
 
     app.layout = create_layout()
-    register_callbacks(app, knowledge_graph)
+    register_callbacks(app)
 
     app.run(debug=True, dev_tools_ui=True)

@@ -18,7 +18,7 @@ class KnowledgeGraphPlot:
             return json.load(f)
 
     def _get_edge_types(self):
-        G = nx.node_link_graph(self.data)
+        G = nx.node_link_graph(self.data, edges='links')
         return list({d.get("type") for _, _, d in G.edges(data=True)})
 
     def _generate_color_map(self):
@@ -28,7 +28,7 @@ class KnowledgeGraphPlot:
         return {etype: next(colors) for etype in self.edge_types_available}
 
     def build_graph(self, selected_types):
-        G = nx.node_link_graph(self.data).to_undirected()
+        G = nx.node_link_graph(self.data, edges='links').to_undirected()
         filtered_edges = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True) if d.get("type") in selected_types]
         return G.edge_subgraph(filtered_edges).copy()
 
@@ -78,13 +78,14 @@ class KnowledgeGraphPlot:
             hoverinfo="text",
             text=node_text,
             marker=dict(
-                showscale=True,
+                showscale=False,
                 colorscale="Viridis",
                 color=node_color,
                 size=15,
                 colorbar=dict(title="Community"),
                 line_width=2,
             ),
+			showlegend=False
         )
 
         fig = go.Figure(data=edge_traces + [node_trace])
