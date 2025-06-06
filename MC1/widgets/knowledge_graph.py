@@ -12,15 +12,6 @@ class KnowledgeGraphPlot:
 		self.color_map = self._generate_color_map()
 		self.html_id = html_id
 
-		self.company_types = {
-			"Entity.Organization.FishingCompany",
-			"Entity.Organization.Company",
-			"Entity.Organization.LogisticsCompany",
-			"Entity.Organization.NGO",
-			"Entity.Organization",
-			"Entity.Organization.GovernmentOrg",
-		}
-
 	def _get_edge_types(self):
 		G = nx.node_link_graph(self.data, edges='links')
 		return list({d.get("type") for _, _, d in G.edges(data=True)})
@@ -46,7 +37,6 @@ class KnowledgeGraphPlot:
 			"Entity.Organization.LogisticsCompany": "diamond",
 			"Entity.Organization.NGO": "triangle-up",
 			"Entity.Organization": "cross",
-			"Entity.Organization.GovernmentOrg": "hexagon",
 		}
 
 		color_map = {
@@ -55,11 +45,10 @@ class KnowledgeGraphPlot:
 			"Entity.Organization.LogisticsCompany": "orange",
 			"Entity.Organization.NGO": "purple",
 			"Entity.Organization": "red",
-			"Entity.Organization.GovernmentOrg": "brown",
 		}
 
 		# Types to disable interactivity (example)
-		non_interactive_types = {"Entity.Person", "Entity.Location.Region"}
+		non_interactive_types = {"Entity.Person", "Entity.Location.Region", "Entity.Organization.GovernmentOrg"}
 
 		# Collect nodes by type
 		nodes_by_type = {}

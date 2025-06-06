@@ -51,7 +51,7 @@ class ParallelCoordinatesPlot:
 
 		self.df_plot = df_plot
 
-	def generate_figure(self):
+	def generate_pcp_figure(self):
 		dimensions = []
 		for col in self.edge_types_available:
 			max_val = self.df_plot[col].max()
@@ -67,6 +67,35 @@ class ParallelCoordinatesPlot:
 			line=dict(color=self.df_plot['_algorithm_code'], colorscale='Portland', showscale=True),
 			dimensions=dimensions
 		))
+		return fig
+
+	def generate_figure(self):
+		fig = go.Figure()
+
+		colors = {
+			'BassLine': 'blue',
+			'ShadGPT': 'orange',
+		}
+
+		for alg in ['BassLine', 'ShadGPT']:
+			df_alg = self.df_plot[self.df_plot['_algorithm'] == alg]
+			fig.add_trace(
+				go.Bar(
+					y=self.edge_types_available,  # categories go on y-axis for horizontal bars
+					x=df_alg[self.edge_types_available].values.flatten(),  # values go on x-axis
+					name=alg,
+					orientation='h',  # horizontal bars
+					marker_color=colors.get(alg, 'gray')
+				)
+			)
+
+		fig.update_layout(
+			barmode='stack',
+			title="Edge Type Counts by Algorithm",
+			xaxis_title="Count",
+			yaxis_title="Edge Type",
+			legend_title="Algorithm"
+		)
 		return fig
 
 	def render(self):
