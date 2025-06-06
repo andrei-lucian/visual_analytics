@@ -39,14 +39,15 @@ main_content_style = {
     "height": "100vh",
 }
 
-knowledge_graph = KnowledgeGraphPlot(
-    json_path="data/mc1.json",
-    html_id="graph",
-)
-parallel_coordinates = ParallelCoordinatesPlot(json_path="data/mc1.json", html_id="pcp")
-edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
-heatmap = Heatmap(json_path="data/mc1.json", html_id="heatmap")
+with open('data/mc1.json', "r") as f:
+	data = json.load(f)
 
+initial_point = 'Namorna Transit Ltd' # Company that all plots get initialized to
+
+knowledge_graph = KnowledgeGraphPlot(data=data, html_id="graph")
+parallel_coordinates = ParallelCoordinatesPlot(data=data, html_id="pcp")
+edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
+heatmap = Heatmap(data=data, html_id="heatmap")
 
 def create_layout():
     layout = html.Div(
@@ -65,7 +66,7 @@ def create_layout():
             html.Div(
                 style={"width": "33%", "padding": "10px"},
                 children=[
-                    dcc.Graph(id="heatmap"),
+                    heatmap.render(initial_point),
                 ],
             ),
         ],

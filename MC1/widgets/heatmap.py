@@ -5,8 +5,7 @@ from dash import dcc, html
 
 
 class Heatmap:
-    def __init__(self, json_path, html_id):
-        self.json_path = json_path
+    def __init__(self, data, html_id):
         self.html_id = html_id
 
         self.company_types = {
@@ -19,8 +18,7 @@ class Heatmap:
         }
 
         self.sentiment_score_map = {"negative": -1, "neutral": 0, "positive": 1}
-
-        self.data = self._load_data()
+        self.data = data
         self.df_nodes, self.df_links = self._create_dfs()
         self.valid_companies = set(self.df_nodes[self.df_nodes["type"].isin(self.company_types)]["id"])
         self.selected_articles = None
@@ -42,10 +40,6 @@ class Heatmap:
         }
 
         self._prepare_links()
-
-    def _load_data(self):
-        with open(self.json_path, "r") as f:
-            return json.load(f)
 
     def _create_dfs(self):
         df_nodes = pd.DataFrame(self.data["nodes"])
@@ -81,9 +75,10 @@ class Heatmap:
 
         self.df_links = df
 
-    def render(self, company_name):
-        df = self.df_links[self.df_links["company"] == company_name].copy()
+    def generate_figure(self, company_name):
+        df = self.df_links[self.df_links["company"] == company_name].dropna().copy()
         self.selected_articles = df["_articleid"]
+        print(self.selected_articles)
         if df.empty:
             return px.imshow([[0]], title="No sentiment data available")
 
@@ -104,3 +99,7 @@ class Heatmap:
 
         fig.update_xaxes(side="top")
         return fig
+    
+    def render(self, company_name):
+        fig = self.generate_figure(company_name=company_name)
+        return dcc.Graph(id=self.html_id, figure=fig)

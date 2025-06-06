@@ -4,21 +4,14 @@ import plotly.graph_objects as go
 from dash import dcc
 
 class ParallelCoordinatesPlot:
-	def __init__(self, json_path, html_id):
-		self.json_path = json_path
+	def __init__(self, data, html_id):
 		self.html_id = html_id
-
-		self.data = self._load_data()
+		self.data = data
 		self.df_nodes, self.df_links = self._create_dfs()
 		self.edge_types_available = self._get_edge_types()
 		self.color_map = self._generate_color_map()
 		self._prepare_plot_df(None)
-		self.fig = self._create_figure()
-
-
-	def _load_data(self):
-		with open(self.json_path, 'r') as f:
-			return json.load(f)
+		self.fig = self.generate_figure()
 
 	def _create_dfs(self):
 		nodes = self.data["nodes"]
@@ -58,7 +51,7 @@ class ParallelCoordinatesPlot:
 
 		self.df_plot = df_plot
 
-	def _create_figure(self):
+	def generate_figure(self):
 		dimensions = []
 		for col in self.edge_types_available:
 			max_val = self.df_plot[col].max()
