@@ -24,3 +24,17 @@ def register_callbacks(app):
         company_name = company_name["points"][0]["text"]
         company_name = company_name.split("Node: ")[1].split("<br>")[0]
         return heatmap.generate_figure(company_name)
+
+    @app.callback(
+        Output("wordcloud", "children"),
+        Input("heatmap", "clickData"),
+        prevent_initial_call=True,
+    )
+    def display_articles(clickData):
+        if clickData:
+            point = clickData["points"][0]
+            month = point["x"]
+            source = point["y"]
+            print(f"Clicked heatmap cell: Month={month}, Source={source}")
+            articles = heatmap.get_article(month, source)
+            return wordcloud.generate_wordcloud(articles, heatmap.company_name)

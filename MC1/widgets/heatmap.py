@@ -76,9 +76,9 @@ class Heatmap:
         self.df_links = df
 
     def generate_figure(self, company_name):
-        df = self.df_links[self.df_links["company"] == company_name].dropna().copy()
+        self.company_name = company_name
+        df = self.df_links[self.df_links["company"] == self.company_name].dropna().copy()
         self.selected_articles = df["_articleid"]
-        print(self.selected_articles)
         if df.empty:
             return px.imshow([[0]], title="No sentiment data available")
 
@@ -94,12 +94,22 @@ class Heatmap:
             color_continuous_scale=[(0, "red"), (0.5, "white"), (1, "blue")],
             aspect="auto",
             labels=dict(x="Month", y="News Source", color="Sentiment Score"),
-            title=f"Sentiment Toward {company_name} Over Time (by Source)",
+            title=f"Sentiment Toward {self.company_name} Over Time (by Source)",
         )
 
         fig.update_xaxes(side="top")
         return fig
-    
+
     def render(self, company_name):
         fig = self.generate_figure(company_name=company_name)
         return dcc.Graph(id=self.html_id, figure=fig)
+
+    def get_article(self, month, source):
+        # print(self.company_name, month, source)
+        filtered = self.df_links[
+            (self.df_links["company"] == self.company_name)
+            & (self.df_links["month"] == month[:7])
+            & (self.df_links["_raw_source"] == source)
+        ]
+        articles = list(set(filtered["_articleid"]))
+        return articles

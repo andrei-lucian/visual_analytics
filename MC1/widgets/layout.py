@@ -5,6 +5,7 @@ from widgets.knowledge_graph import *
 from widgets.parallel_coordinates import *
 from widgets.heatmap import *
 from widgets.dropdown import *
+from widgets.wordcloud import *
 
 # --- Styles ---
 sidebar_style = {
@@ -39,15 +40,17 @@ main_content_style = {
     "height": "100vh",
 }
 
-with open('data/mc1.json', "r") as f:
-	data = json.load(f)
+with open("data/mc1.json", "r") as f:
+    data = json.load(f)
 
-initial_point = 'Namorna Transit Ltd' # Company that all plots get initialized to
+initial_point = "Namorna Transit Ltd"  # Company that all plots get initialized to
 
 knowledge_graph = KnowledgeGraphPlot(data=data, html_id="graph")
 parallel_coordinates = ParallelCoordinatesPlot(data=data, html_id="pcp")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
+wordcloud = WordCloudWidget([], id="wordcloud")
+
 
 def create_layout():
     layout = html.Div(
@@ -65,9 +68,7 @@ def create_layout():
             # Right side (33%) for heatmap
             html.Div(
                 style={"width": "33%", "padding": "10px"},
-                children=[
-                    heatmap.render(initial_point),
-                ],
+                children=[heatmap.render(initial_point), wordcloud.render()],
             ),
         ],
     )
