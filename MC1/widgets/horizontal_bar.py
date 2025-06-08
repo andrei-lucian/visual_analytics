@@ -4,10 +4,25 @@ import plotly.graph_objects as go
 from dash import dcc
 
 
-class ParallelCoordinatesPlot:
+class HorizontalBarPlot:
     def __init__(self, data, html_id):
         self.html_id = html_id
         self.data = data
+        self.edge_type_sentiment = {
+            "Event.Applaud": "positive",
+            "Event.Aid": "positive",
+            "Event.Invest": "positive",
+            "Event.Fishing.SustainableFishing": "positive",
+            "Event.Criticize": "negative",
+            "Event.Convicted": "negative",
+            "Event.CertificateIssued.Summons": "negative",
+            "Event.Fishing.OverFishing": "negative",
+            "Event.CertificateIssued": "neutral",
+            "Event.Transaction": "neutral",
+            "Event.Fishing": "neutral",
+            "Event.Owns.PartiallyOwns": "neutral",
+            "Event.Communication.Conference": "neutral",
+        }
         self.df_nodes, self.df_links = self._create_dfs()
         self.edge_types_available = self._get_edge_types()
         self.color_map = self._generate_color_map()
@@ -20,7 +35,9 @@ class ParallelCoordinatesPlot:
         return pd.DataFrame(nodes), pd.DataFrame(links)
 
     def _get_edge_types(self):
-        return self.df_links["type"].unique()
+        types = self.df_links["type"].unique()
+        sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
+        return sorted(types, key=lambda x: sentiment_order.get(self.edge_type_sentiment.get(x, "neutral"), 1))
 
     def _generate_color_map(self):
         # Map _algorithm strings to numbers for coloring
@@ -84,13 +101,45 @@ class ParallelCoordinatesPlot:
             df_alg = self.df_plot[self.df_plot["_algorithm"] == alg]
             fig.add_trace(
                 go.Bar(
-                    y=self.edge_types_available,  # categories go on y-axis for horizontal bars
-                    x=df_alg[self.edge_types_available].values.flatten(),  # values go on x-axis
+                    y=self.edge_types_available,
+                    x=df_alg[self.edge_types_available].values.flatten(),
                     name=alg,
-                    orientation="h",  # horizontal bars
+                    orientation="h",
                     marker_color=colors.get(alg, "gray"),
                 )
             )
+
+        # Add background color blocks for sentiment groups
+        shapes = []
+        y_labels = list(self.edge_types_available)
+        sentiment_groups = {"negative": "red", "neutral": "white", "positive": "green"}
+
+        y_index = {label: i for i, label in enumerate(y_labels)}
+        current_group = None
+        start = None
+
+        for i, label in enumerate(y_labels + [None]):  # add sentinel
+            sentiment = self.edge_type_sentiment.get(label, "neutral") if label else None
+
+            if sentiment != current_group:
+                if current_group is not None:
+                    shapes.append(
+                        dict(
+                            type="rect",
+                            xref="paper",
+                            yref="y",
+                            x0=0,
+                            x1=1,
+                            y0=y_labels[start],
+                            y1=y_labels[i - 1],
+                            fillcolor=sentiment_groups[current_group],
+                            opacity=0.2,
+                            layer="below",
+                            line_width=0,
+                        )
+                    )
+                current_group = sentiment
+                start = i
 
         fig.update_layout(
             barmode="stack",
@@ -98,6 +147,7 @@ class ParallelCoordinatesPlot:
             xaxis_title="Count",
             yaxis_title="Edge Type",
             legend_title="Algorithm",
+            shapes=shapes,
         )
         return fig
 

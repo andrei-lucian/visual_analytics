@@ -2,6 +2,8 @@ import json
 import pandas as pd
 import plotly.express as px
 from dash import dcc, html
+import plotly.graph_objects as go
+import numpy as np
 
 
 class Heatmap:
@@ -85,21 +87,77 @@ class Heatmap:
         df["score"] = df["sentiment"].map(self.sentiment_score_map)
         df["month"] = df["month"].astype(str)
 
-        df_heat = df.groupby(["month", "_raw_source"])["score"].mean().reset_index()
+        # Step 1: Define fixed month range (update to match your dataset as needed)
+        fixed_months = pd.period_range(start="2035-02", end="2035-07", freq="M").astype(str)
 
-        heatmap_data = df_heat.pivot(index="_raw_source", columns="month", values="score").fillna(0)
+        # Step 2: Group and pivot as before
+        df_heat = df.groupby(["month", "_raw_source"])["score"].mean().reset_index()
+        heatmap_data = df_heat.pivot(index="_raw_source", columns="month", values="score")
+
+        # Step 3: Reindex columns to match fixed month range
+        heatmap_data = heatmap_data.reindex(columns=fixed_months, fill_value=np.nan)
 
         fig = px.imshow(
             heatmap_data,
-            zmin=-1,  # Set minimum value of color scale
-            zmax=1,  # Set maximum value of color scale
-            color_continuous_scale=[(0, "red"), (0.5, "white"), (1, "green")],
+            zmin=-1,
+            zmax=1,
+            color_continuous_scale=[[0.0, "red"], [0.5, "white"], [1.0, "green"]],
             aspect="auto",
             labels=dict(x="Month", y="News Source", color="Sentiment Score"),
             title=f"Sentiment Toward {self.company_name} Over Time (by Source)",
         )
 
-        fig.update_xaxes(side="top")
+        # Set missing data color to grey
+        fig.update_traces(
+            hovertemplate="Score: %{z}<extra></extra>",
+            zmin=-1,
+            zmax=1,
+            zauto=False,
+            zsmooth=False,
+            xgap=2,
+            ygap=2,
+            showscale=True,
+            colorbar=dict(title="Sentiment"),
+            hoverongaps=False,
+            autocolorscale=False,
+        )
+
+        # This sets background of NaN cells to grey
+        fig.update_layout(
+            coloraxis_colorbar=dict(title="Sentiment"),
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            margin=dict(t=50, l=100),
+        )
+        fig.update_traces(
+            z=heatmap_data.to_numpy(),
+            colorscale=[[0, "red"], [0.5, "white"], [1, "green"]],
+            zmin=-1,
+            zmax=1,
+            hoverongaps=False,
+            zauto=False,
+            showscale=True,
+            xgap=2,
+            ygap=2,
+        )
+
+        # Add grey color for NaNs by layering over background
+        fig.add_trace(
+            go.Heatmap(
+                z=heatmap_data.isna().astype(int),
+                x=heatmap_data.columns,
+                y=heatmap_data.index,
+                showscale=False,
+                colorscale=[[0, "rgba(0,0,0,0)"], [1, "lightgrey"]],
+                hoverinfo="skip",
+                xgap=2,
+                ygap=2,
+            )
+        )
+
+        fig.update_xaxes(side="top", showgrid=True, gridcolor="lightgray", tickangle=-45)
+        fig.update_yaxes(showgrid=True, gridcolor="lightgray")
+
         return fig
 
     def render(self, company_name):

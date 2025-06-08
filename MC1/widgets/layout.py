@@ -2,10 +2,11 @@
 from dash import html
 
 from widgets.knowledge_graph import *
-from widgets.parallel_coordinates import *
+from widgets.horizontal_bar import *
 from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
+from widgets.boxplot import *
 
 # --- Styles ---
 sidebar_style = {
@@ -46,10 +47,11 @@ with open("data/mc1.json", "r") as f:
 initial_point = "Namorna Transit Ltd"  # Company that all plots get initialized to
 
 knowledge_graph = KnowledgeGraphPlot(data=data, html_id="graph")
-parallel_coordinates = ParallelCoordinatesPlot(data=data, html_id="pcp")
+parallel_coordinates = HorizontalBarPlot(data=data, html_id="pcp")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
 wordcloud = WordCloudWidget([], id="wordcloud")
+sentiment_boxplot = SentimentBoxplot(id="boxplot")
 
 
 def create_layout():
@@ -68,7 +70,7 @@ def create_layout():
             # Right side (33%) for heatmap
             html.Div(
                 style={"width": "50%", "padding": "10px"},
-                children=[heatmap.render(initial_point), wordcloud.render()],
+                children=[heatmap.render(initial_point), wordcloud.render(), sentiment_boxplot.render([], [])],
             ),
         ],
     )

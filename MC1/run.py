@@ -7,7 +7,7 @@ from dash.dependencies import Input, Output
 import pandas as pd
 import sys
 import os
-
+import nltk
 
 if __name__ == "__main__":
 
@@ -15,6 +15,8 @@ if __name__ == "__main__":
     This is the main layout of the webpage, its children are then sub divided
     into further html layouts
     """
+    nltk.download("punkt")
+    nltk.download("vader_lexicon")
 
     app.layout = create_layout()
     register_callbacks(app)

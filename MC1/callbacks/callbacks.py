@@ -39,3 +39,16 @@ def register_callbacks(app):
             articles = heatmap.get_article(month, source)
             print(articles)
             return wordcloud.generate_wordcloud(articles, heatmap.company_name)
+
+    @app.callback(
+        Output("boxplot", "figure"),
+        Input("heatmap", "clickData"),
+        prevent_initial_call=True,
+    )
+    def display_articles(clickData):
+        if clickData:
+            point = clickData["points"][0]
+            month = point["x"]
+            source = point["y"]
+            articles = heatmap.get_article(month, source)
+            return sentiment_boxplot.get_boxplot_figure(articles, [source])
