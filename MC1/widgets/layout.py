@@ -58,7 +58,7 @@ def create_layout():
         children=[
             # Left side (67%)
             html.Div(
-                style={"width": "67%", "padding": "10px"},
+                style={"width": "50%", "padding": "10px"},
                 children=[
                     edge_type_dropdown.render(),
                     knowledge_graph.render(),
@@ -67,7 +67,7 @@ def create_layout():
             ),
             # Right side (33%) for heatmap
             html.Div(
-                style={"width": "33%", "padding": "10px"},
+                style={"width": "50%", "padding": "10px"},
                 children=[heatmap.render(initial_point), wordcloud.render()],
             ),
         ],

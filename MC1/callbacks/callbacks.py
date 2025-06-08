@@ -37,4 +37,5 @@ def register_callbacks(app):
             source = point["y"]
             print(f"Clicked heatmap cell: Month={month}, Source={source}")
             articles = heatmap.get_article(month, source)
+            print(articles)
             return wordcloud.generate_wordcloud(articles, heatmap.company_name)

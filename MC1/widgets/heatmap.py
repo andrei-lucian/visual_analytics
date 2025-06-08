@@ -91,7 +91,9 @@ class Heatmap:
 
         fig = px.imshow(
             heatmap_data,
-            color_continuous_scale=[(0, "red"), (0.5, "white"), (1, "blue")],
+            zmin=-1,  # Set minimum value of color scale
+            zmax=1,  # Set maximum value of color scale
+            color_continuous_scale=[(0, "red"), (0.5, "white"), (1, "green")],
             aspect="auto",
             labels=dict(x="Month", y="News Source", color="Sentiment Score"),
             title=f"Sentiment Toward {self.company_name} Over Time (by Source)",
