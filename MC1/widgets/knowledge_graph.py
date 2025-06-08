@@ -27,7 +27,7 @@ class KnowledgeGraphPlot:
 		filtered_edges = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True) if d.get("type") in selected_types]
 		return G.edge_subgraph(filtered_edges).copy()
 
-	def generate_figure(self, selected_types):
+	def generate_figure(self, selected_types, highlight_node_id=None):
 		G_filtered = self.build_graph(selected_types)
 
 		# Example shapes for types
@@ -124,12 +124,20 @@ class KnowledgeGraphPlot:
 		node_traces = []
 
 		for ctype, nodes in nodes_by_type.items():
-			x_vals = [pos[n][0] for n in nodes]
-			y_vals = [pos[n][1] for n in nodes]
+			x_vals, y_vals, hover_texts, sizes, colors, line_colors = [], [], [], [], [], []
 
-			hover_texts = [f"Node: {n}<br>Type: {ctype}" for n in nodes]
+			for n in nodes:
+				x, y = pos[n]
+				x_vals.append(x)
+				y_vals.append(y)
+				hover_texts.append(f"Node: {n}<br>Type: {ctype}")
 
-			# Determine if nodes of this type are interactive
+				is_highlighted = (n == highlight_node_id)
+
+				sizes.append(22 if is_highlighted else 15)
+				colors.append(color_map.get(ctype, "pink"))
+				line_colors.append("black" if not is_highlighted else "gold")
+
 			is_interactive = ctype not in non_interactive_types
 
 			node_traces.append(
@@ -140,11 +148,11 @@ class KnowledgeGraphPlot:
 					hoverinfo="text" if is_interactive else "skip",
 					text=hover_texts if is_interactive else None,
 					marker=dict(
-						size=15,
+						size=sizes,
+						color=colors,
 						symbol=type_to_shape.get(ctype, "circle"),
-						color=color_map.get(ctype, "pink"),
-						line_width=2,
-						line_color="black",
+						line=dict(width=2, color=line_colors),
+						opacity=1  # Make sure opacity is not lowered
 					),
 					showlegend=True,
 					name=ctype,
