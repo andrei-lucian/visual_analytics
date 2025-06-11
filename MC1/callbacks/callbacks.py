@@ -22,12 +22,23 @@ def register_callbacks(app):
 			selected_edge_types, highlight_node_id=text
 		)
 
-	@app.callback(Output("pcp", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
-	def update_pcp(selected_point):
+	@app.callback(Output("horizontalbar", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
+	def update_horizontalbar(selected_point):
 		text = selected_point["points"][0]["text"]
 		text = text.split("Node: ")[1].split("<br>")[0]
-		parallel_coordinates._prepare_plot_df(text)
-		return parallel_coordinates.generate_figure()
+		horizontal_bar._prepare_plot_df(text)
+		return horizontal_bar.generate_figure()
+	
+	@app.callback(
+		Output("pcp", "figure"), 
+		Input("graph", "clickData"), 
+		prevent_initial_call=True
+	)
+	def update_parallelpcp(selected_point):
+		text = selected_point["points"][0]["text"]
+		text = text.split("Node: ")[1].split("<br>")[0]
+		parallel_coordinate._prepare_plot_df(text)
+		return parallel_coordinate.generate_figure()
 
 	@app.callback(Output("heatmap", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
 	def update_heatmap(company_name):

@@ -72,23 +72,7 @@ class HorizontalBarPlot:
 		df_plot["_algorithm_code"] = df_plot["_algorithm"].map(self.color_map)
 
 		self.df_plot = df_plot
-
-	def generate_pcp_figure(self):
-		dimensions = []
-		for col in self.edge_types_available:
-			max_val = self.df_plot[col].max()
-			if max_val == 0:
-				max_val = 1  # avoid zero range error
-			dimensions.append(dict(range=[0, max_val], label=col, values=self.df_plot[col]))
-
-		fig = go.Figure(
-			data=go.Parcoords(
-				line=dict(color=self.df_plot["_algorithm_code"], colorscale="Portland", showscale=True),
-				dimensions=dimensions,
-			)
-		)
-		return fig
-
+		
 	def generate_figure(self):
 		fig = go.Figure()
 
