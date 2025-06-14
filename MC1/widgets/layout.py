@@ -6,7 +6,7 @@ from widgets.horizontal_bar import *
 from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
-from widgets.parallel_coordinate_plot import *
+from MC1.widgets.stream_graph import *
 from widgets.sentiment_comparison_bar import *
 
 
@@ -53,7 +53,7 @@ horizontal_bar = HorizontalBarPlot(data=data, html_id="horizontalbar")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
 wordcloud = WordCloudWidget([], id="wordcloud")
-parallel_coordinate = ParallelCoordinatePlot(data=data, html_id="stream_graph")
+stream_graph = StreamGraph(data=data, html_id="stream_graph")
 
 
 def create_layout():
@@ -67,7 +67,7 @@ def create_layout():
                     edge_type_dropdown.render(),
                     knowledge_graph.render(),
                     horizontal_bar.render(),
-                    parallel_coordinate.render(),
+                    stream_graph.render(),
                 ],
             ),
             html.Div(

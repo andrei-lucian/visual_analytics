@@ -1,6 +1,5 @@
 from dash.dependencies import Input, Output
 from widgets.layout import *
-import re
 from widgets.sentiment_comparison_bar import *
 
 
@@ -29,8 +28,8 @@ def register_callbacks(app):
     def update_stream(selected_point):
         text = selected_point["points"][0]["text"]
         text = text.split("Node: ")[1].split("<br>")[0]
-        parallel_coordinate._prepare_plot_df(text)
-        return parallel_coordinate.generate_figure()
+        stream_graph._prepare_plot_df(text)
+        return stream_graph.generate_figure()
 
     @app.callback(Output("heatmap", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
     def update_heatmap(company_name):
@@ -52,11 +51,11 @@ def register_callbacks(app):
             source = point["y"]
             articles = heatmap.get_articles(month, source)
             horizontal_bar._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
-            parallel_coordinate._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
+            stream_graph._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
             return (
                 wordcloud.generate_wordcloud(articles, heatmap.company_name),
                 horizontal_bar.generate_figure(),
-                parallel_coordinate.generate_figure(),
+                stream_graph.generate_figure(),
             )
 
     @app.callback(
@@ -73,16 +72,3 @@ def register_callbacks(app):
             articles = heatmap.get_articles(month, source)
             sentiment_bar = DivergingSentimentPlot(html_id="sentiment-container")
             return dcc.Graph(figure=sentiment_bar.build_figure(triplet_sentiment_score, articles, heatmap.company_name))
-
-    # @app.callback(Output("highlighted-text", "children"), Input("heatmap", "clickData"), prevent_initial_call=True)
-    # def update_text_display(clickData):
-    #     if clickData:
-    #         point = clickData["points"][0]
-    #         month = point["x"]
-    #         source = point["y"]
-    #         article_names = heatmap.get_article(month, source)
-    #         print(article_names)
-    #         article_path = f"data/articles/{article_names[0]}.txt"
-    #         with open(article_path, "r") as f:
-    #             text = f.read()
-    #         return highlighter.get_highlighted_text(text, entities=[heatmap.company_name])
