@@ -12,15 +12,11 @@ from transformers import (
 )
 from transformers.pipelines import AggregationStrategy
 import numpy as np
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
-import torch
-import torch.nn.functional as F
-import nltk
+from transformers import AutoTokenizer
 from nltk.tokenize import sent_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
 
 
-# Define keyphrase extraction pipeline
 class KeyphraseExtractionPipeline(TokenClassificationPipeline):
     def __init__(self, model, *args, **kwargs):
         super().__init__(
@@ -56,8 +52,6 @@ class WordCloudWidget:
             with open(path, "r") as file:
                 text = file.read()
                 phrases = self.get_key_phrases(text, entity)
-                sentiment = self.classify_aspect_sentiment(text, entity)
-                print("sentiment", sentiment)
                 for phrase in phrases:
                     phrases_list.append(phrase)
                 print(phrases_list)
@@ -98,31 +92,6 @@ class WordCloudWidget:
         key_phrases = set(nlp_phrases + model_phrases)
 
         return key_phrases
-
-    def classify_aspect_sentiment(self, text, entity):
-        model_name = "yangheng/deberta-v3-base-absa-v1.1"
-        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
-
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-
-        # Tokenize the sentence with the aspect as text_pair
-        inputs = tokenizer(text, entity, return_tensors="pt", truncation=True)
-
-        # Run the model
-        with torch.no_grad():
-            outputs = model(**inputs)
-
-        # Get logits and softmax probabilities
-        logits = outputs.logits
-        probs = F.softmax(logits, dim=1)
-
-        # Map index to sentiment label (usually 0: negative, 1: neutral, 2: positive)
-        labels = ["Negative", "Neutral", "Positive"]
-        print(probs)
-        pred = torch.argmax(probs, dim=1).item()
-        confidence = probs[0, pred].item()
-
-        return {"aspect": entity, "sentiment": labels[pred], "confidence": round(confidence, 3)}
 
     def extract_polar_chunks(self, text, entity):
         # Load spaCy model (small English model)

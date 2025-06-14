@@ -164,7 +164,7 @@ class Heatmap:
         fig = self.generate_figure(company_name=company_name)
         return dcc.Graph(id=self.html_id, figure=fig)
 
-    def get_article(self, month, source):
+    def get_articles(self, month, source):
         # print(self.company_name, month, source)
         filtered = self.df_links[
             (self.df_links["company"] == self.company_name)
@@ -173,3 +173,47 @@ class Heatmap:
         ]
         articles = list(set(filtered["_articleid"]))
         return articles
+
+    def get_sentiment_score(self, clickData):
+        """
+        Given clickData from the heatmap, returns the sentiment score of that cell.
+        Returns None if invalid or missing.
+        """
+        if not clickData:
+            return None
+
+        try:
+            point = clickData["points"][0]
+            raw_month = point["x"]
+            source = str(point["y"])
+
+            # Normalize month to "YYYY-MM" format
+            if isinstance(raw_month, str):
+                month = raw_month[:7]  # assume format "YYYY-MM-DD" or "YYYY-MM"
+            elif hasattr(raw_month, "strftime"):  # datetime or Timestamp
+                month = raw_month.strftime("%Y-%m")
+            else:
+                month = str(raw_month)[:7]
+
+        except (KeyError, IndexError, TypeError) as e:
+            print("Error parsing clickData:", e)
+            return None
+
+        # Filter and preprocess
+        df = self.df_links[self.df_links["company"] == self.company_name].copy()
+        df["score"] = df["sentiment"].map(self.sentiment_score_map)
+
+        # Ensure month is in "YYYY-MM" format
+        df["month"] = df["month"].dt.to_timestamp().dt.strftime("%Y-%m")
+        df["_raw_source"] = df["_raw_source"].astype(str)
+
+        # Pivot
+        df_heat = df.groupby(["month", "_raw_source"])["score"].mean().reset_index()
+        heatmap_data = df_heat.pivot(index="_raw_source", columns="month", values="score")
+
+        try:
+            score = heatmap_data.loc[source, month]
+            return None if pd.isna(score) else round(score, 3)
+        except KeyError as e:
+            print(f"Lookup failed. Source: '{source}', Month: '{month}' not found.")
+            return None

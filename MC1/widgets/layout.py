@@ -7,6 +7,7 @@ from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
 from widgets.parallel_coordinate_plot import *
+from widgets.sentiment_comparison_bar import *
 
 
 # --- Styles ---
@@ -71,7 +72,11 @@ def create_layout():
             ),
             html.Div(
                 style={"width": "50%", "padding": "10px"},
-                children=[heatmap.render(initial_point), dcc.Loading(wordcloud.render())],
+                children=[
+                    heatmap.render(initial_point),
+                    dcc.Loading(wordcloud.render()),
+                    html.Div(id="sentiment-container"),
+                ],
             ),
         ],
     )

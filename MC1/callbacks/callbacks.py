@@ -1,6 +1,7 @@
 from dash.dependencies import Input, Output
 from widgets.layout import *
 import re
+from widgets.sentiment_comparison_bar import *
 
 
 def register_callbacks(app):
@@ -48,9 +49,24 @@ def register_callbacks(app):
             month = point["x"]
             source = point["y"]
             print(f"Clicked heatmap cell: Month={month}, Source={source}")
-            articles = heatmap.get_article(month, source)
+            articles = heatmap.get_articles(month, source)
             print(articles)
             return wordcloud.generate_wordcloud(articles, heatmap.company_name)
+
+    @app.callback(
+        Output("sentiment-container", "children"),
+        Input("heatmap", "clickData"),
+        prevent_initial_call=True,
+    )
+    def display_articles(clickData):
+        if clickData:
+            triplet_sentiment_score = heatmap.get_sentiment_score(clickData)
+            point = clickData["points"][0]
+            month = point["x"]
+            source = point["y"]
+            articles = heatmap.get_articles(month, source)
+            sentiment_bar = DivergingSentimentPlot(html_id="sentiment-container")
+            return dcc.Graph(figure=sentiment_bar.build_figure(triplet_sentiment_score, articles, heatmap.company_name))
 
     # @app.callback(Output("highlighted-text", "children"), Input("heatmap", "clickData"), prevent_initial_call=True)
     # def update_text_display(clickData):
