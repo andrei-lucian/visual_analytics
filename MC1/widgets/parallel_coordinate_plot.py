@@ -39,11 +39,29 @@ class ParallelCoordinatePlot:
 		sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
 		return sorted(types, key=lambda x: sentiment_order.get(self.edge_type_sentiment.get(x, "neutral"), 1))
 
-	def _prepare_plot_df(self, selected_point="Namorna Transit Ltd"):
+	def _prepare_plot_df(self, selected_point="Namorna Transit Ltd", heatmap_filter=None):
+		print(selected_point)
+		print("hi")
 		if selected_point is not None:
 			filtered_df = self.df_links[
 				(self.df_links["source"] == selected_point) | (self.df_links["target"] == selected_point)
 			]
+			
+			if heatmap_filter is not None:
+				print(heatmap_filter)
+				# Ensure your datetime column is parsed
+				filtered_df['_date_added'] = pd.to_datetime(filtered_df['_date_added'])
+
+				# Extract year and month
+				filter_date = pd.to_datetime(heatmap_filter[0])
+				filter_source = heatmap_filter[1]
+		
+				# Filter by month and source
+				filtered_df = filtered_df[
+					(filtered_df['_date_added'].dt.year == filter_date.year) &
+					(filtered_df['_date_added'].dt.month == filter_date.month) &
+					(filtered_df['_raw_source'] == filter_source)
+				]
 		else:
 			filtered_df = self.df_links
 

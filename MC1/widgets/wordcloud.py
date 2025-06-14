@@ -54,7 +54,6 @@ class WordCloudWidget:
                 phrases = self.get_key_phrases(text, entity)
                 for phrase in phrases:
                     phrases_list.append(phrase)
-                print(phrases_list)
         phrases_list = phrases_list[:7]
         if not phrases_list:
             phrases_list = ["empty"]
@@ -82,7 +81,7 @@ class WordCloudWidget:
 
         # Filter sentences mentioning the company
         entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
-        # print(entity_sentences)
+
         text = " ".join(entity_sentences)
 
         model_phrases = extractor(text)
