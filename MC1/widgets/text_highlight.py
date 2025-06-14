@@ -3,8 +3,8 @@ from nltk.tokenize import sent_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
 from dash import html
 
-nltk.download("punkt")
-nltk.download("vader_lexicon")
+# nltk.download("punkt")
+# nltk.download("vader_lexicon")
 
 
 class SentimentHighlighter:
