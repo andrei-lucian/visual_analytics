@@ -77,7 +77,8 @@ class Heatmap:
 
         self.df_links = df
 
-    def generate_figure(self, company_name):
+    def generate_figure(self, company_name, clickData=None):
+
         self.company_name = company_name
         df = self.df_links[self.df_links["company"] == self.company_name].dropna().copy()
         self.selected_articles = df["_articleid"]
@@ -97,6 +98,26 @@ class Heatmap:
         # Step 3: Reindex columns to match fixed month range
         heatmap_data = heatmap_data.reindex(columns=fixed_months, fill_value=np.nan)
 
+        highlight_x = highlight_y = None
+        if clickData:
+            try:
+                point = clickData["points"][0]
+                highlight_x = point["x"][:7]  # normalize month
+                highlight_y = point["y"]
+            except Exception as e:
+                print("Error extracting highlight coordinates:", e)
+        if highlight_x and highlight_y:
+            fig.add_shape(
+                type="rect",
+                xref="x",
+                yref="y",
+                x0=highlight_x,
+                x1=highlight_x,
+                y0=highlight_y,
+                y1=highlight_y,
+                line=dict(color="black", width=3),
+            )
+
         fig = px.imshow(
             heatmap_data,
             zmin=-1,
@@ -104,7 +125,7 @@ class Heatmap:
             color_continuous_scale=[[0.0, "red"], [0.5, "white"], [1.0, "green"]],
             aspect="auto",
             labels=dict(x="Month", y="News Source", color="Sentiment Score"),
-            title=f"Sentiment Toward {self.company_name} Over Time (by Source)",
+            title=f"Sentiment Toward {self.company_name} Over Time (by Source, extracted from triplet database)",
         )
 
         # Set missing data color to grey
@@ -128,6 +149,7 @@ class Heatmap:
             plot_bgcolor="white",
             paper_bgcolor="white",
             margin=dict(t=50, l=100),
+            xaxis=dict(tickangle=0),
         )
         fig.update_traces(
             z=heatmap_data.to_numpy(),
@@ -160,17 +182,19 @@ class Heatmap:
 
         return fig
 
-    def render(self, company_name):
-        fig = self.generate_figure(company_name=company_name)
+    def render(self, company_name, clickData=None):
+        fig = self.generate_figure(company_name=company_name, clickData=clickData)
         return dcc.Graph(id=self.html_id, figure=fig)
 
     def get_articles(self, month, source):
-        # print(self.company_name, month, source)
         filtered = self.df_links[
             (self.df_links["company"] == self.company_name)
             & (self.df_links["month"] == month[:7])
             & (self.df_links["_raw_source"] == source)
         ]
+        print(month, source)
+        print(filtered["_raw_source"])
+        print(filtered["_articleid"])
         articles = list(set(filtered["_articleid"]))
         return articles
 

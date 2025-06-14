@@ -73,7 +73,7 @@ def create_layout():
             html.Div(
                 style={"width": "50%", "padding": "10px"},
                 children=[
-                    heatmap.render(initial_point),
+                    heatmap.render(company_name=initial_point, clickData=None),
                     dcc.Loading(wordcloud.render()),
                     dcc.Loading(html.Div(id="sentiment-container")),
                 ],

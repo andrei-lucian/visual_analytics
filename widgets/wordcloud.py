@@ -9,12 +9,15 @@ from transformers import (
     TokenClassificationPipeline,
     AutoModelForTokenClassification,
     AutoTokenizer,
+    AutoModelForSequenceClassification,
 )
 from transformers.pipelines import AggregationStrategy
 import numpy as np
 from transformers import AutoTokenizer
 from nltk.tokenize import sent_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
+import torch
+import torch.nn.functional as F
 
 
 class KeyphraseExtractionPipeline(TokenClassificationPipeline):
@@ -41,6 +44,14 @@ class WordCloudWidget:
         self.height = height
         self.background_color = background_color
         self.id = id
+        self.phrase_polarity_model_name = "yangheng/deberta-v3-base-absa-v1.1"
+        self.tokenizer = AutoTokenizer.from_pretrained(self.phrase_polarity_model_name)
+        self.polarity_model = AutoModelForSequenceClassification.from_pretrained(self.phrase_polarity_model_name)
+        self.keyphrase_extractor_model_name = "ml6team/keyphrase-extraction-distilbert-inspec"
+        self.keyphrase_extractor = KeyphraseExtractionPipeline(model=self.keyphrase_extractor_model_name)
+        self.force_red_keywords = {"overfishing, condemnation"}
+        self.force_green_keywords = {"sustainab"}
+        self.force_grey_keywords = {"stichtingmarine"}
 
     def render(self):
         return html.Div(id=self.id)
@@ -52,30 +63,72 @@ class WordCloudWidget:
             with open(path, "r") as file:
                 text = file.read()
                 phrases = self.get_key_phrases(text, entity)
-                for phrase in phrases:
-                    phrases_list.append(phrase)
-        phrases_list = phrases_list[:7]
+                phrases_list.extend(phrases)
+
         if not phrases_list:
-            phrases_list = ["empty"]
-        text = " ".join(phrase.replace(" ", "_") for phrase in phrases_list)
+            phrases_list = ["Phantom triplet! This company was never actually mentioned in the alleged article."]
 
-        wc = WordCloud(
-            width=self.width,
-            height=self.height,
-            background_color=self.background_color,
-        ).generate(text)
+        # Compute sentiment for each unique phrase
+        unique_phrases = list(set(phrases_list))
+        phrases_with_sentiment = [(phrase, self.classify_sentiment(phrase, entity)) for phrase in unique_phrases]
+        print(phrases_with_sentiment)
+        return self.render_phrase_tags(phrases_with_sentiment)
 
-        buf = BytesIO()
-        wc.to_image().save(buf, format="PNG")
-        buf.seek(0)
-        encoded = base64.b64encode(buf.read()).decode()
-        image = f"data:image/png;base64,{encoded}"
-        return html.Img(src=image, style={"maxWidth": "100%", "height": "auto"})
+    def classify_sentiment(self, text, entity):
+        inputs = self.tokenizer(text, entity, return_tensors="pt", truncation=True)
+        with torch.no_grad():
+            outputs = self.polarity_model(**inputs)
+        probs = F.softmax(outputs.logits, dim=1)
+        label_id = probs.argmax().item()
+        labels = ["negative", "neutral", "positive"]
+        score = probs[0][label_id].item()
+
+        # Add sign to the score based on sentiment label
+        if labels[label_id] == "negative":
+            score = -score
+        elif labels[label_id] == "neutral":
+            score = 0.0
+
+        return labels[label_id], score
+
+    def sentiment_color(self, phrase, score):
+        phrase_lower = phrase.lower()
+        if phrase == "Phantom triplet! This company was never actually mentioned in the alleged article.":
+            return "purple"
+        elif any(keyword in phrase_lower for keyword in self.force_red_keywords) or score < -0.2:
+            return "red"
+        elif any(keyword in phrase_lower for keyword in self.force_green_keywords) or score > 0.2:
+            return "green"
+        elif any(keyword in phrase_lower for keyword in self.force_grey_keywords):
+            return "gray"
+        else:
+            return "gray"
+
+    def render_phrase_tags(self, phrases_with_sentiment):
+        return html.Div(
+            id=self.id or "phrase-tags",
+            style={"display": "flex", "flexWrap": "wrap", "gap": "10px"},
+            children=[
+                html.Span(
+                    phrase,
+                    style={
+                        "backgroundColor": self.sentiment_color(phrase, score),
+                        "color": "white",
+                        "padding": "6px 10px",
+                        "borderRadius": "12px",
+                        "fontWeight": "bold",
+                        "fontSize": "16px",
+                        "whiteSpace": "normal",  # allow multi-line
+                        "overflow": "visible",  # no clipping
+                        "textOverflow": "unset",  # disable ellipsis
+                    },
+                    title=f"Sentiment: {score:+.2f}",
+                )
+                for phrase, (label, score) in sorted(phrases_with_sentiment, key=lambda x: -abs(x[1][1]))
+            ],
+        )
 
     def get_key_phrases(self, text, entity):
-        model_name = "ml6team/keyphrase-extraction-distilbert-inspec"
-        extractor = KeyphraseExtractionPipeline(model=model_name)
-
         # Split into sentences
         sentences = self.custom_sentence_split(text)
 
@@ -84,7 +137,7 @@ class WordCloudWidget:
 
         text = " ".join(entity_sentences)
 
-        model_phrases = extractor(text)
+        model_phrases = self.keyphrase_extractor(text)
         model_phrases = [str(s) for s in model_phrases.tolist()]
         nlp_phrases = self.extract_polar_chunks(text, entity)
 
@@ -111,9 +164,9 @@ class WordCloudWidget:
             for chunk in doc.noun_chunks:
                 text = chunk.text
                 # Get polarity score (compound) for the chunk text
-                polarity = sia.polarity_scores(text)["compound"]
-                if polarity != 0:
-                    chunk_polarities.append(text)
+                # polarity = sia.polarity_scores(text)["compound"]
+                # if polarity != 0:
+                chunk_polarities.append(text)
 
         return chunk_polarities
 

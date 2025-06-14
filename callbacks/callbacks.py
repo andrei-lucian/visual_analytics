@@ -32,10 +32,10 @@ def register_callbacks(app):
         return stream_graph.generate_figure()
 
     @app.callback(Output("heatmap", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
-    def update_heatmap(company_name):
-        company_name = company_name["points"][0]["text"]
+    def update_heatmap(clickData):
+        company_name = clickData["points"][0]["text"]
         company_name = company_name.split("Node: ")[1].split("<br>")[0]
-        return heatmap.generate_figure(company_name)
+        return heatmap.generate_figure(company_name, clickData)
 
     @app.callback(
         Output("wordcloud", "children"),

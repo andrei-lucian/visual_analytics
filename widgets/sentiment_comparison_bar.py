@@ -3,6 +3,7 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import torch.nn.functional as F
 from dash import dcc
+from nltk.tokenize import sent_tokenize
 
 
 class DivergingSentimentPlot:
@@ -30,9 +31,8 @@ class DivergingSentimentPlot:
         sentiment_scores = self.classify_aspect_sentiment(articles, entity)
         sentiment_scores.insert(0, triplet_sentiment_score)
         articles.insert(0, "Extracted triplet sentiment")
-        print(sentiment_scores, articles)
-        colors = ["red" if score < 0 else "green" for score in sentiment_scores]
-        text_labels = [f"{score:+.2f}" for score in sentiment_scores]
+        colors = ["gray" if score is None else ("red" if score < 0 else "green") for score in sentiment_scores]
+        text_labels = [f"{score:+.2f}" if score is not None else "N/A" for score in sentiment_scores]
 
         fig = go.Figure(
             go.Bar(
@@ -65,14 +65,17 @@ class DivergingSentimentPlot:
             path = f"data/articles/{art}.txt"
             with open(path, "r") as file:
                 text = file.read()
+                # Split into sentences
+                sentences = self.custom_sentence_split(text)
+                # Filter sentences mentioning the company
+                entity_sentences = " ".join([s for s in sentences if entity.lower() in s.lower()])
                 model_name = "yangheng/deberta-v3-base-absa-v1.1"
                 tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
 
                 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
                 # Tokenize the sentence with the aspect as text_pair
-                inputs = tokenizer(text, entity, return_tensors="pt", truncation=True)
-
+                inputs = tokenizer(entity_sentences, entity, return_tensors="pt", truncation=True)
                 # Run the model
                 with torch.no_grad():
                     outputs = model(**inputs)
@@ -85,3 +88,17 @@ class DivergingSentimentPlot:
                 )
                 sentiments.append(sentiment_score.item())
         return sentiments
+
+    def custom_sentence_split(self, text):
+        # Split text into blocks using double newlines (titles/paragraphs)
+        blocks = text.split("\n\n")
+
+        sentences = []
+        for block in blocks:
+            block = block.strip()
+            if not block:
+                continue
+            # Further split using sent_tokenize for real sentence boundaries
+            sentences.extend(sent_tokenize(block))
+
+        return sentences
