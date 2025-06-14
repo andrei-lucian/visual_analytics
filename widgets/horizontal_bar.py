@@ -57,6 +57,7 @@ class HorizontalBarPlot:
 			]
 			if heatmap_filter is not None:
 				# Ensure your datetime column is parsed
+				filtered_df = filtered_df.copy()
 				filtered_df['_date_added'] = pd.to_datetime(filtered_df['_date_added'])
 
 				# Extract year and month

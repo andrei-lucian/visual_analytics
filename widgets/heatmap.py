@@ -7,8 +7,16 @@ import numpy as np
 
 class Heatmap:
     def __init__(self, data, html_id):
+        """
+        Initialize the Heatmap component.
+
+        Parameters:
+        - data (dict): Dictionary containing 'nodes' and 'links' for graph data.
+        - html_id (str): HTML ID for Dash component.
+        """
         self.html_id = html_id
 
+        # Define valid company types
         self.company_types = {
             "Entity.Organization.FishingCompany",
             "Entity.Organization.Company",
@@ -18,12 +26,14 @@ class Heatmap:
             "Entity.Organization.GovernmentOrg",
         }
 
+        # Map sentiment labels to numerical scores
         self.sentiment_score_map = {"negative": -1, "neutral": 0, "positive": 1}
         self.data = data
         self.df_nodes, self.df_links = self._create_dfs()
         self.valid_companies = set(self.df_nodes[self.df_nodes["type"].isin(self.company_types)]["id"])
         self.selected_articles = None
 
+        # Map event types to sentiment and recipient
         self.event_sentiment_map = {
             "Event.Applaud": ("positive", "target"),
             "Event.Aid": ("positive", "target"),
@@ -43,11 +53,13 @@ class Heatmap:
         self._prepare_links()
 
     def _create_dfs(self):
+        """Convert input node/link data to pandas DataFrames."""
         df_nodes = pd.DataFrame(self.data["nodes"])
         df_links = pd.DataFrame(self.data["links"])
         return df_nodes, df_links
 
     def _get_company_from_link(self, row):
+        """Determine the company involved in a link based on recipient and node type."""
         target = row["target"]
         source = row["source"]
         recipient = row["sentiment_recipient"]
@@ -62,28 +74,43 @@ class Heatmap:
         return None
 
     def _prepare_links(self):
+        """Process links DataFrame to assign sentiment and associated company."""
         df = self.df_links
 
+        # Assign sentiment and recipient type
         df[["sentiment", "sentiment_recipient"]] = df["type"].apply(
             lambda x: pd.Series(self.event_sentiment_map.get(x, ("neutral", "target")))
         )
 
+        # Assign associated company
         df["company"] = df.apply(self._get_company_from_link, axis=1)
         df.dropna(subset=["company"], inplace=True)
 
+        # Convert date and extract month
         df["_date_added"] = pd.to_datetime(df["_date_added"], errors="coerce")
         df["month"] = df["_date_added"].dt.to_period("M")
 
         self.df_links = df
 
     def generate_figure(self, company_name, clickData=None):
+        """
+        Generate the heatmap figure for a selected company.
 
+        Parameters:
+        - company_name (str): The selected company.
+        - clickData (dict or None): Optional click data from Dash.
+
+        Returns:
+        - fig (plotly.graph_objects.Figure): The resulting heatmap.
+        """
         self.company_name = company_name
         df = self.df_links[self.df_links["company"] == self.company_name].dropna().copy()
         self.selected_articles = df["_articleid"]
+
         if df.empty:
             return px.imshow([[0]], title="No sentiment data available")
 
+        # Map sentiment to numeric score
         df["score"] = df["sentiment"].map(self.sentiment_score_map)
         df["month"] = df["month"].astype(str)
 
@@ -127,22 +154,19 @@ class Heatmap:
             title=f"Sentiment Toward {self.company_name} Over Time (by Source, extracted from triplet database)",
         )
 
-        # Set missing data color to grey
+        # Update heatmap trace
         fig.update_traces(
             hovertemplate="Score: %{z}<extra></extra>",
-            zmin=-1,
-            zmax=1,
             zauto=False,
             zsmooth=False,
             xgap=2,
             ygap=2,
             showscale=True,
-            colorbar=dict(title="Sentiment"),
             hoverongaps=False,
             autocolorscale=False,
         )
 
-        # This sets background of NaN cells to grey
+        # Layout customization
         fig.update_layout(
             coloraxis_colorbar=dict(title="Sentiment"),
             plot_bgcolor="white",
@@ -155,14 +179,7 @@ class Heatmap:
             colorscale=[[0, "red"], [0.5, "white"], [1, "green"]],
             zmin=-1,
             zmax=1,
-            hoverongaps=False,
-            zauto=False,
-            showscale=True,
-            xgap=2,
-            ygap=2,
         )
-
-        # Add grey color for NaNs by layering over background
         fig.add_trace(
             go.Heatmap(
                 z=heatmap_data.isna().astype(int),
@@ -182,10 +199,30 @@ class Heatmap:
         return fig
 
     def render(self, company_name, clickData=None):
+        """
+        Render the heatmap as a Dash Graph component.
+
+        Parameters:
+        - company_name (str): Company to display data for.
+        - clickData (dict or None): Optional clickData for highlighting.
+
+        Returns:
+        - dcc.Graph: Dash component with the heatmap figure.
+        """
         fig = self.generate_figure(company_name=company_name, clickData=clickData)
         return dcc.Graph(id=self.html_id, figure=fig)
 
     def get_articles(self, month, source):
+        """
+        Return a list of article IDs for the given month and news source.
+
+        Parameters:
+        - month (str): Month in 'YYYY-MM' format.
+        - source (str): News source string.
+
+        Returns:
+        - list: Unique article IDs.
+        """
         filtered = self.df_links[
             (self.df_links["company"] == self.company_name)
             & (self.df_links["month"] == month[:7])
@@ -198,6 +235,12 @@ class Heatmap:
         """
         Given clickData from the heatmap, returns the sentiment score of that cell.
         Returns None if invalid or missing.
+
+        Parameters:
+        - clickData (dict or None): Click event data from the Dash graph.
+
+        Returns:
+        - float or None: Sentiment score (rounded) or None.
         """
         if not clickData:
             return None
@@ -207,7 +250,6 @@ class Heatmap:
             raw_month = point["x"]
             source = str(point["y"])
 
-            # Normalize month to "YYYY-MM" format
             if isinstance(raw_month, str):
                 month = raw_month[:7]  # assume format "YYYY-MM-DD" or "YYYY-MM"
             elif hasattr(raw_month, "strftime"):  # datetime or Timestamp
@@ -219,15 +261,11 @@ class Heatmap:
             print("Error parsing clickData:", e)
             return None
 
-        # Filter and preprocess
         df = self.df_links[self.df_links["company"] == self.company_name].copy()
         df["score"] = df["sentiment"].map(self.sentiment_score_map)
-
-        # Ensure month is in "YYYY-MM" format
         df["month"] = df["month"].dt.to_timestamp().dt.strftime("%Y-%m")
         df["_raw_source"] = df["_raw_source"].astype(str)
 
-        # Pivot
         df_heat = df.groupby(["month", "_raw_source"])["score"].mean().reset_index()
         heatmap_data = df_heat.pivot(index="_raw_source", columns="month", values="score")
 

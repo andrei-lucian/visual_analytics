@@ -70,7 +70,7 @@ class DivergingSentimentPlot:
                 # Filter sentences mentioning the company
                 entity_sentences = " ".join([s for s in sentences if entity.lower() in s.lower()])
                 model_name = "yangheng/deberta-v3-base-absa-v1.1"
-                tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+                tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
 
                 model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
