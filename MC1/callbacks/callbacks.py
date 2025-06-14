@@ -24,8 +24,8 @@ def register_callbacks(app):
         horizontal_bar._prepare_plot_df(text)
         return horizontal_bar.generate_figure()
 
-    @app.callback(Output("pcp", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
-    def update_parallelpcp(selected_point):
+    @app.callback(Output("stream_graph", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
+    def update_stream(selected_point):
         text = selected_point["points"][0]["text"]
         text = text.split("Node: ")[1].split("<br>")[0]
         parallel_coordinate._prepare_plot_df(text)
@@ -39,18 +39,20 @@ def register_callbacks(app):
 
     @app.callback(
         Output("wordcloud", "children"),
+        Output("horizontalbar", "figure", allow_duplicate=True),
+		Output("stream_graph", "figure", allow_duplicate=True),
         Input("heatmap", "clickData"),
-        prevent_initial_call=True,
+        prevent_initial_call=True
     )
     def display_articles(clickData):
         if clickData:
             point = clickData["points"][0]
             month = point["x"]
             source = point["y"]
-            print(f"Clicked heatmap cell: Month={month}, Source={source}")
             articles = heatmap.get_article(month, source)
-            print(articles)
-            return wordcloud.generate_wordcloud(articles, heatmap.company_name)
+            horizontal_bar._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
+            parallel_coordinate._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
+            return wordcloud.generate_wordcloud(articles, heatmap.company_name), horizontal_bar.generate_figure(), parallel_coordinate.generate_figure()
 
     # @app.callback(Output("highlighted-text", "children"), Input("heatmap", "clickData"), prevent_initial_call=True)
     # def update_text_display(clickData):

@@ -52,7 +52,7 @@ horizontal_bar = HorizontalBarPlot(data=data, html_id="horizontalbar")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
 wordcloud = WordCloudWidget([], id="wordcloud")
-parallel_coordinate = ParallelCoordinatePlot(data=data, html_id="pcp")
+parallel_coordinate = ParallelCoordinatePlot(data=data, html_id="stream_graph")
 
 
 def create_layout():

@@ -165,7 +165,6 @@ class Heatmap:
         return dcc.Graph(id=self.html_id, figure=fig)
 
     def get_article(self, month, source):
-        # print(self.company_name, month, source)
         filtered = self.df_links[
             (self.df_links["company"] == self.company_name)
             & (self.df_links["month"] == month[:7])

@@ -57,10 +57,8 @@ class WordCloudWidget:
                 text = file.read()
                 phrases = self.get_key_phrases(text, entity)
                 sentiment = self.classify_aspect_sentiment(text, entity)
-                print("sentiment", sentiment)
                 for phrase in phrases:
                     phrases_list.append(phrase)
-                print(phrases_list)
         phrases_list = phrases_list[:7]
         if not phrases_list:
             phrases_list = ["empty"]
@@ -88,7 +86,7 @@ class WordCloudWidget:
 
         # Filter sentences mentioning the company
         entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
-        # print(entity_sentences)
+
         text = " ".join(entity_sentences)
 
         model_phrases = extractor(text)
@@ -118,7 +116,7 @@ class WordCloudWidget:
 
         # Map index to sentiment label (usually 0: negative, 1: neutral, 2: positive)
         labels = ["Negative", "Neutral", "Positive"]
-        print(probs)
+
         pred = torch.argmax(probs, dim=1).item()
         confidence = probs[0, pred].item()
 
