@@ -6,4 +6,4 @@ import dash_bootstrap_components as dbc
 external_stylesheets = [dbc.themes.LUX]
 
 app = Dash(__name__, external_stylesheets=external_stylesheets)
-app.title = "JBI100 Template"
+app.title = "Bias Hunter"
