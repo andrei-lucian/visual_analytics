@@ -6,7 +6,7 @@ from widgets.horizontal_bar import *
 from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
-from MC1.widgets.stream_graph import *
+from widgets.stream_graph import *
 from widgets.sentiment_comparison_bar import *
 
 
@@ -75,7 +75,7 @@ def create_layout():
                 children=[
                     heatmap.render(initial_point),
                     dcc.Loading(wordcloud.render()),
-                    html.Div(id="sentiment-container"),
+                    dcc.Loading(html.Div(id="sentiment-container")),
                 ],
             ),
         ],

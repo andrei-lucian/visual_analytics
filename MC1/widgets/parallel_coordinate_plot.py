@@ -46,7 +46,6 @@ class ParallelCoordinatePlot:
             ]
 
             if heatmap_filter is not None:
-                print(heatmap_filter)
                 # Ensure your datetime column is parsed
                 filtered_df["_date_added"] = pd.to_datetime(filtered_df["_date_added"])
 
