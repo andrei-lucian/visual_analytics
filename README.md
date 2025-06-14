@@ -1,0 +1,1 @@
+pyinstaller --noconfirm --clean --onefile run.py 
