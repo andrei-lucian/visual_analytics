@@ -5,6 +5,35 @@ from dash import Output, Input, callback_context, no_update
 
 
 def register_callbacks(app):
+    """
+    Register all Dash callback functions for interactivity.
+
+    This function connects the UI elements (graph, dropdown, heatmap, wordcloud, sentiment bars, etc.)
+    with their corresponding logic using Dash callbacks. It enables dynamic behavior when users 
+    interact with the app, such as clicking on nodes in the graph or cells in the heatmap.
+
+    Callbacks Registered:
+    ---------------------
+    1. update_graph:
+        Updates the network graph visualization based on selected edge types and clicked node.
+    
+    2. update_heatmap:
+        Updates the sentiment heatmap based on the node selected in the graph.
+    
+    3. update_all_outputs:
+        Updates the word cloud, horizontal bar chart, stream graph, and sentiment comparison
+        when a heatmap cell is clicked. Falls back to placeholder messages when only the graph is clicked.
+
+    Parameters:
+    -----------
+    app : dash.Dash
+        The Dash app instance to which callbacks are registered.
+
+    Returns:
+    --------
+    None
+    """
+    
     @app.callback(Output("graph", "figure"), Input("dropdown", "value"), Input("graph", "clickData"))
     def update_graph(selected_edge_types, clicked_node_id):
         if not selected_edge_types:
