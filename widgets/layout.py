@@ -56,11 +56,14 @@ wordcloud = WordCloudWidget([], id="wordcloud")
 stream_graph = StreamGraph(data=data, html_id="stream_graph")
 
 
+from dash import html, dcc
+
+
 def create_layout():
     layout = html.Div(
         style={"display": "flex", "flexDirection": "row", "width": "100%", "height": "100%"},
         children=[
-            # Left side (67%)
+            # Left side (50%)
             html.Div(
                 style={"width": "50%", "padding": "10px"},
                 children=[
@@ -70,12 +73,55 @@ def create_layout():
                     stream_graph.render(),
                 ],
             ),
+            # Right side (50%)
             html.Div(
                 style={"width": "50%", "padding": "10px"},
                 children=[
                     heatmap.render(company_name=initial_point, clickData=None),
-                    dcc.Loading(wordcloud.render()),
-                    dcc.Loading(html.Div(id="sentiment-container")),
+                    # Wordcloud container with placeholder
+                    dcc.Loading(
+                        html.Div(
+                            id="wordcloud-container",
+                            children=[
+                                # This placeholder text will be replaced by the actual wordcloud on callback
+                                html.Div(
+                                    "Click on the heatmap to load wordcloud",
+                                    style={
+                                        "height": "300px",  # adjust height to match your wordcloud widget
+                                        "display": "flex",
+                                        "justifyContent": "center",
+                                        "alignItems": "center",
+                                        "color": "#a8c7e7",  # light blueish text
+                                        "fontStyle": "italic",
+                                        # "backgroundColor": "#1a1f2b",  # dark background consistent with theme
+                                        "borderRadius": "12px",
+                                        "marginBottom": "20px",
+                                    },
+                                )
+                            ],
+                        ),
+                    ),
+                    # Sentiment container with placeholder
+                    dcc.Loading(
+                        html.Div(
+                            id="sentiment-container",
+                            children=[
+                                html.Div(
+                                    "Click on the heatmap to load sentiment comparison",
+                                    style={
+                                        "height": "200px",  # match your sentiment bar height
+                                        "display": "flex",
+                                        "justifyContent": "center",
+                                        "alignItems": "center",
+                                        "color": "#a8c7e7",
+                                        "fontStyle": "italic",
+                                        # "backgroundColor": "#1a1f2b",
+                                        "borderRadius": "12px",
+                                    },
+                                )
+                            ],
+                        ),
+                    ),
                 ],
             ),
         ],

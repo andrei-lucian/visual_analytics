@@ -1,7 +1,6 @@
-import json
 import pandas as pd
 import plotly.express as px
-from dash import dcc, html
+from dash import dcc
 import plotly.graph_objects as go
 import numpy as np
 

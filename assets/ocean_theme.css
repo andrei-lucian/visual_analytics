@@ -1,0 +1,90 @@
+/* General body styling */
+body {
+    background-color: #001f3f; /* very dark navy blue */
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #cce6ff; /* light sky blue text for readability */
+}
+
+/* Page title */
+h1, h2, h3 {
+    color: #3399ff; /* bright ocean blue */
+    text-align: center;
+    padding: 10px 0;
+}
+
+/* Heatmap graph container */
+#heatmap {
+    border: 2px solid #004080; /* darker blue border */
+    border-radius: 12px;
+    padding: 20px;
+    background-color: #002b55; /* dark ocean blue */
+    box-shadow: 0 4px 10px rgba(0, 64, 128, 0.6);
+    margin: 20px;
+}
+
+/* Optional wrapper class for sections */
+.section-container {
+    background-color: #003366; /* dark navy */
+    padding: 20px;
+    border-radius: 16px;
+    margin: 20px;
+    box-shadow: 0 2px 8px rgba(0, 64, 128, 0.4);
+}
+
+/* Dropdowns, buttons, etc. */
+.Select-control, .dash-dropdown, .dash-bootstrap input {
+    border-radius: 8px;
+    border: 1px solid #3399ff; /* medium bright blue */
+    background-color: #001f3f;
+    color: #cce6ff;
+}
+
+/* Dropdown input text color */
+.Select-control input, .dash-dropdown input, .dash-bootstrap input {
+    color: #cce6ff;
+}
+
+/* Hover effects */
+.dash-dropdown:hover, .Select-control:hover {
+    border-color: #66b3ff; /* lighter blue */
+    background-color: #004080;
+}
+
+/* Button styling */
+button {
+    background-color: #004080; /* darker ocean blue */
+    color: white;
+    border-radius: 8px;
+    padding: 10px 15px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0066cc; /* brighter blue on hover */
+}
+
+/* Tooltip and hover text */
+.plotly-tooltip {
+    background-color: rgba(0, 51, 102, 0.95) !important; /* dark semi-transparent bg */
+    color: #99ccff !important; /* light blue text */
+    border: 1px solid #3399ff !important;
+    border-radius: 6px !important;
+    font-size: 13px !important;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .section-container {
+        padding: 10px;
+        margin: 10px;
+    }
+
+    #heatmap {
+        padding: 10px;
+        margin: 10px;
+    }
+}

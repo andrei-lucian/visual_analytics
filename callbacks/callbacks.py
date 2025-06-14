@@ -1,6 +1,7 @@
 from dash.dependencies import Input, Output
 from widgets.layout import *
 from widgets.sentiment_comparison_bar import *
+from dash import Output, Input, callback_context, no_update
 
 
 def register_callbacks(app):
@@ -17,20 +18,6 @@ def register_callbacks(app):
 
         return knowledge_graph.generate_figure(selected_edge_types, highlight_node_id=text)
 
-    @app.callback(Output("horizontalbar", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
-    def update_horizontalbar(selected_point):
-        text = selected_point["points"][0]["text"]
-        text = text.split("Node: ")[1].split("<br>")[0]
-        horizontal_bar._prepare_plot_df(text)
-        return horizontal_bar.generate_figure()
-
-    @app.callback(Output("stream_graph", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
-    def update_stream(selected_point):
-        text = selected_point["points"][0]["text"]
-        text = text.split("Node: ")[1].split("<br>")[0]
-        stream_graph._prepare_plot_df(text)
-        return stream_graph.generate_figure()
-
     @app.callback(Output("heatmap", "figure"), Input("graph", "clickData"), prevent_initial_call=True)
     def update_heatmap(clickData):
         company_name = clickData["points"][0]["text"]
@@ -38,37 +25,69 @@ def register_callbacks(app):
         return heatmap.generate_figure(company_name, clickData)
 
     @app.callback(
-        Output("wordcloud", "children"),
-        Output("horizontalbar", "figure", allow_duplicate=True),
-        Output("stream_graph", "figure", allow_duplicate=True),
-        Input("heatmap", "clickData"),
+        [
+            Output("wordcloud-container", "children"),
+            Output("horizontalbar", "figure"),
+            Output("stream_graph", "figure"),
+            Output("sentiment-container", "children"),
+        ],
+        [Input("heatmap", "clickData"), Input("graph", "clickData")],
         prevent_initial_call=True,
     )
-    def display_articles(clickData):
-        if clickData:
-            point = clickData["points"][0]
-            month = point["x"]
-            source = point["y"]
-            articles = heatmap.get_articles(month, source)
-            horizontal_bar._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
-            stream_graph._prepare_plot_df(heatmap.company_name, heatmap_filter=(month, source))
+    def update_all_outputs(heatmap_click, graph_click):
+        triggered = callback_context.triggered[0]["prop_id"].split(".")[0]
+
+        if triggered == "graph":
+            placeholder_style = {
+                "display": "flex",
+                "justifyContent": "center",
+                "alignItems": "center",
+                "color": "#a8c7e7",
+                "fontStyle": "italic",
+                "backgroundColor": "#1a1f2b",
+                "borderRadius": "12px",
+            }
+
             return (
-                wordcloud.generate_wordcloud(articles, heatmap.company_name),
-                horizontal_bar.generate_figure(),
-                stream_graph.generate_figure(),
+                html.Div(
+                    "Click on the heatmap to load wordcloud",
+                    style={**placeholder_style, "height": "300px", "marginBottom": "20px"},
+                ),
+                no_update,
+                no_update,
+                html.Div(
+                    "Click on the heatmap to load sentiment comparison",
+                    style={**placeholder_style, "height": "200px"},
+                ),
             )
 
-    @app.callback(
-        Output("sentiment-container", "children"),
-        Input("heatmap", "clickData"),
-        prevent_initial_call=True,
-    )
-    def display_articles(clickData):
-        if clickData:
-            triplet_sentiment_score = heatmap.get_sentiment_score(clickData)
-            point = clickData["points"][0]
+        if triggered == "heatmap" and heatmap_click is not None:
+            point = heatmap_click["points"][0]
             month = point["x"]
             source = point["y"]
+
+            # Get company name from last clicked node on graph
+            if graph_click is not None:
+                company_name = graph_click["points"][0]["text"].split("Node: ")[1].split("<br>")[0]
+            else:
+                company_name = "Namorna Transit Ltd"  # fallback
+
             articles = heatmap.get_articles(month, source)
+
+            wordcloud_component = wordcloud.generate_wordcloud(articles, company_name)
+            horizontal_bar._prepare_plot_df(company_name, heatmap_filter=(month, source))
+            stream_graph._prepare_plot_df(company_name, heatmap_filter=(month, source))
+
             sentiment_bar = DivergingSentimentPlot(html_id="sentiment-container")
-            return dcc.Graph(figure=sentiment_bar.build_figure(triplet_sentiment_score, articles, heatmap.company_name))
+            sentiment_figure = dcc.Graph(
+                figure=sentiment_bar.build_figure(heatmap.get_sentiment_score(heatmap_click), articles, company_name)
+            )
+
+            return (
+                wordcloud_component,
+                horizontal_bar.generate_figure(),
+                stream_graph.generate_figure(),
+                sentiment_figure,
+            )
+
+        return no_update, no_update, no_update, no_update

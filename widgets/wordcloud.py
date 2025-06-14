@@ -1,7 +1,4 @@
-import base64
-from io import BytesIO
 from typing import List
-from wordcloud import WordCloud
 from dash import html
 import spacy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
@@ -52,9 +49,7 @@ class WordCloudWidget:
         self.force_red_keywords = {"overfishing, condemnation"}
         self.force_green_keywords = {"sustainab"}
         self.force_grey_keywords = {"stichtingmarine"}
-
-    def render(self):
-        return html.Div(id=self.id)
+        self.nlp = spacy.load("en_core_web_sm")
 
     def generate_wordcloud(self, articles, entity):
         phrases_list = []
@@ -70,7 +65,16 @@ class WordCloudWidget:
 
         # Compute sentiment for each unique phrase
         unique_phrases = list(set(phrases_list))
-        phrases_with_sentiment = [(phrase, self.classify_sentiment(phrase, entity)) for phrase in unique_phrases]
+
+        phrases_with_sentiment = []
+        for phrase in unique_phrases:
+            label, score = self.classify_sentiment(phrase, entity)
+            if label != "neutral":  # ✅ Filter out neutral phrases
+                phrases_with_sentiment.append((phrase, (label, score)))
+
+        if not phrases_with_sentiment:
+            phrases_with_sentiment = [("All phrases were neutral", ("neutral", 0.0))]
+
         print(phrases_with_sentiment)
         return self.render_phrase_tags(phrases_with_sentiment)
 
@@ -107,7 +111,17 @@ class WordCloudWidget:
     def render_phrase_tags(self, phrases_with_sentiment):
         return html.Div(
             id=self.id or "phrase-tags",
-            style={"display": "flex", "flexWrap": "wrap", "gap": "10px"},
+            style={
+                "height": "300px",
+                "overflowY": "auto",  # Enables vertical scroll if needed
+                "padding": "10px",
+                "backgroundColor": "#1a1f2b",
+                "borderRadius": "12px",
+                "marginBottom": "20px",
+                "display": "flex",
+                "flexWrap": "wrap",  # Ensure phrases wrap properly
+                "alignContent": "flex-start",  # Push wrapped content to the top
+            },
             children=[
                 html.Span(
                     phrase,
@@ -147,7 +161,6 @@ class WordCloudWidget:
 
     def extract_polar_chunks(self, text, entity):
         # Load spaCy model (small English model)
-        nlp = spacy.load("en_core_web_sm")
 
         # Initialize VADER sentiment analyzer
         sia = SentimentIntensityAnalyzer()
@@ -156,19 +169,16 @@ class WordCloudWidget:
         # Filter sentences mentioning the company
         entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
 
-        chunk_polarities = []
+        chunks = []
 
         for sent in entity_sentences:
-            doc = nlp(sent)
+            doc = self.nlp(sent)
 
             for chunk in doc.noun_chunks:
                 text = chunk.text
-                # Get polarity score (compound) for the chunk text
-                # polarity = sia.polarity_scores(text)["compound"]
-                # if polarity != 0:
-                chunk_polarities.append(text)
+                chunks.append(text)
 
-        return chunk_polarities
+        return chunks
 
     def custom_sentence_split(self, text):
         # Split text into blocks using double newlines (titles/paragraphs)
