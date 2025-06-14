@@ -4,7 +4,30 @@ import pandas as pd
 
 
 class StreamGraph:
+    """
+    A class to create a stream graph visualization of edge types categorized by sentiment
+    and annotated by different users, based on graph data containing nodes and links.
+
+    Attributes:
+        html_id (str): The HTML element ID for rendering the Dash Graph component.
+        data (dict): Dictionary containing 'nodes' and 'links' information.
+        edge_type_sentiment (dict): Mapping from edge types to sentiment categories.
+        df_nodes (pd.DataFrame): DataFrame constructed from nodes data.
+        df_links (pd.DataFrame): DataFrame constructed from links data.
+        edge_types_available (List[str]): Sorted list of edge types ordered by sentiment.
+        df_plot (pd.DataFrame): DataFrame used for plotting after processing.
+        fig (plotly.graph_objs.Figure): Plotly figure object for the stream graph.
+    """
+
     def __init__(self, data, html_id):
+        """
+        Initializes the StreamGraph instance by preparing dataframes, edge types,
+        processed plotting data, and the initial figure.
+
+        Parameters:
+            data (dict): Dictionary containing 'nodes' and 'links' lists.
+            html_id (str): The HTML id string for the Dash Graph component.
+        """
         self.html_id = html_id
         self.data = data
 
@@ -30,31 +53,54 @@ class StreamGraph:
         self.fig = self.generate_figure()
 
     def _create_dfs(self):
+        """
+        Converts the input data dictionaries into pandas DataFrames for nodes and links.
+
+        Returns:
+            Tuple[pd.DataFrame, pd.DataFrame]: DataFrames for nodes and links respectively.
+        """
         nodes = self.data["nodes"]
         links = self.data["links"]
         return pd.DataFrame(nodes), pd.DataFrame(links)
 
     def _get_edge_types(self):
+        """
+        Retrieves unique edge types from links and sorts them according to sentiment priority:
+        negative < neutral < positive.
+
+        Returns:
+            List[str]: Sorted list of edge types based on their sentiment category.
+        """
         types = self.df_links["type"].unique()
         sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
         return sorted(types, key=lambda x: sentiment_order.get(self.edge_type_sentiment.get(x, "neutral"), 1))
 
     def _prepare_plot_df(self, selected_point="Namorna Transit Ltd", heatmap_filter=None):
+        """
+        Prepares the DataFrame for plotting by filtering links related to a selected node,
+        optionally applying a time and source filter, then aggregating counts of edge types
+        by annotators.
+
+        Parameters:
+            selected_point (str, optional): The node (source or target) to filter links by.
+                                            Defaults to "Namorna Transit Ltd".
+            heatmap_filter (Tuple[datetime-like, str], optional): Tuple containing a date filter
+                                            (year-month) and raw source string to further filter links.
+                                            Defaults to None.
+        """
         if selected_point is not None:
             filtered_df = self.df_links[
                 (self.df_links["source"] == selected_point) | (self.df_links["target"] == selected_point)
             ]
 
             if heatmap_filter is not None:
-                # Ensure your datetime column is parsed
+                # Ensure datetime column is parsed for filtering
                 filtered_df = filtered_df.copy()
                 filtered_df["_date_added"] = pd.to_datetime(filtered_df["_date_added"])
 
-                # Extract year and month
                 filter_date = pd.to_datetime(heatmap_filter[0])
                 filter_source = heatmap_filter[1]
 
-                # Filter by month and source
                 filtered_df = filtered_df[
                     (filtered_df["_date_added"].dt.year == filter_date.year)
                     & (filtered_df["_date_added"].dt.month == filter_date.month)
@@ -78,47 +124,25 @@ class StreamGraph:
         self.df_plot = df_wide.melt(id_vars="_last_edited_by", var_name="edge_type", value_name="count")
 
     def _add_sentiment_bands(self, fig):
-        # Calculate the cumulative counts for each edge_type across all annotators
-        # This will define y-axis ranges for the bands
+        """
+        Adds colored background bands to the plotly figure to visually indicate the sentiment
+        category (positive, neutral, negative) associated with each edge type.
+
+        Parameters:
+            fig (plotly.graph_objs.Figure): The Plotly figure to add sentiment bands to.
+        """
         total_counts = (
             self.df_plot.groupby("edge_type")["count"].sum().reindex(self.edge_types_available).fillna(0).cumsum()
         )
 
         sentiment_colors = {"positive": "green", "neutral": "lightgray", "negative": "red"}
-        y0 = 0
 
-        for i, edge_type in enumerate(self.edge_types_available):
-            y1 = total_counts[edge_type]
-
-            sentiment = self.edge_type_sentiment.get(edge_type, "neutral")
-            color = sentiment_colors.get(sentiment, "lightgray")
-
-            fig.add_shape(
-                type="rect",
-                xref="x",
-                yref="y",
-                x0=edge_type,
-                x1=edge_type,
-                y0=0,
-                y1=y1,
-                fillcolor=color,
-                opacity=0.15,
-                layer="below",
-                line_width=0,
-            )
-            # Because x-axis is categorical, rectangles can't cover area horizontally by x0,x1.
-            # Instead, we add rectangle over full vertical height at that x-position by using paper coords:
-            # We'll fix this in the next step below.
-
-        # Instead, add wider rectangles spanning full y height but limited x range (between edge types)
-        # Convert categories to numerical x positions (0,1,2,...)
-        x_positions = {et: i for i, et in enumerate(self.edge_types_available)}
+        # Clear previous shapes to avoid duplication
         shapes = []
         for i, edge_type in enumerate(self.edge_types_available):
             sentiment = self.edge_type_sentiment.get(edge_type, "neutral")
             color = sentiment_colors.get(sentiment, "lightgray")
 
-            # x-range: center at i, span from i - 0.5 to i + 0.5
             shapes.append(
                 dict(
                     type="rect",
@@ -134,11 +158,16 @@ class StreamGraph:
                     line_width=0,
                 )
             )
-
-        # Clear any previous shapes to avoid duplicates and add these shapes
         fig.update_layout(shapes=shapes)
 
     def generate_figure(self):
+        """
+        Generates the Plotly area chart figure representing the stream graph,
+        with traces for each annotator and colored sentiment bands.
+
+        Returns:
+            plotly.graph_objs.Figure: The generated stream graph figure.
+        """
         df_melted = self.df_plot
         fig = px.area(
             df_melted,
@@ -162,10 +191,16 @@ class StreamGraph:
             legend_title="Annotator",
         )
 
-        # Add colored background bands for sentiment
+        # Add colored background bands for sentiment categories
         self._add_sentiment_bands(fig)
 
         return fig
 
     def render(self):
+        """
+        Returns the Dash Graph component rendering the prepared figure.
+
+        Returns:
+            dash.dcc.Graph: Dash Graph component for the stream graph visualization.
+        """
         return dcc.Graph(id=self.html_id, figure=self.fig)
