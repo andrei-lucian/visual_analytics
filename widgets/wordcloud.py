@@ -45,7 +45,7 @@ class WordCloudWidget:
         self.background_color = background_color
         self.id = id
         self.phrase_polarity_model_name = "yangheng/deberta-v3-base-absa-v1.1"
-        self.tokenizer = AutoTokenizer.from_pretrained(self.phrase_polarity_model_name)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.phrase_polarity_model_name, use_fast=False)
         self.polarity_model = AutoModelForSequenceClassification.from_pretrained(self.phrase_polarity_model_name)
         self.keyphrase_extractor_model_name = "ml6team/keyphrase-extraction-distilbert-inspec"
         self.keyphrase_extractor = KeyphraseExtractionPipeline(model=self.keyphrase_extractor_model_name)
