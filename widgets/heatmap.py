@@ -191,9 +191,6 @@ class Heatmap:
             & (self.df_links["month"] == month[:7])
             & (self.df_links["_raw_source"] == source)
         ]
-        print(month, source)
-        print(filtered["_raw_source"])
-        print(filtered["_articleid"])
         articles = list(set(filtered["_articleid"]))
         return articles
 

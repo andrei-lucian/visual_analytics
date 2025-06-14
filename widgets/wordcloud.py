@@ -75,7 +75,6 @@ class WordCloudWidget:
         if not phrases_with_sentiment:
             phrases_with_sentiment = [("All phrases were neutral", ("neutral", 0.0))]
 
-        print(phrases_with_sentiment)
         return self.render_phrase_tags(phrases_with_sentiment)
 
     def classify_sentiment(self, text, entity):
