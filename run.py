@@ -5,6 +5,14 @@ nltk.download("punkt")
 nltk.download('punkt_tab')
 nltk.download("vader_lexicon")
 
+import spacy
+try:
+    spacy.load("en_core_web_sm")
+except OSError:
+    from spacy.cli import download
+    download("en_core_web_sm")
+    spacy.load("en_core_web_sm")
+
 from widgets.layout import *
 from callbacks.callbacks import register_callbacks
 
