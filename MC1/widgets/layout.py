@@ -6,8 +6,8 @@ from widgets.horizontal_bar import *
 from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
-from widgets.boxplot import *
 from widgets.parallel_coordinate_plot import *
+
 
 # --- Styles ---
 sidebar_style = {
@@ -52,7 +52,6 @@ horizontal_bar = HorizontalBarPlot(data=data, html_id="horizontalbar")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
 wordcloud = WordCloudWidget([], id="wordcloud")
-sentiment_boxplot = SentimentBoxplot(id="boxplot")
 parallel_coordinate = ParallelCoordinatePlot(data=data, html_id="pcp")
 
 
@@ -70,10 +69,9 @@ def create_layout():
                     parallel_coordinate.render(),
                 ],
             ),
-            # Right side (33%) for heatmap
             html.Div(
                 style={"width": "50%", "padding": "10px"},
-                children=[heatmap.render(initial_point), wordcloud.render(), sentiment_boxplot.render([], [])],
+                children=[heatmap.render(initial_point), dcc.Loading(wordcloud.render())],
             ),
         ],
     )

@@ -1,11 +1,41 @@
 import base64
 from io import BytesIO
 from typing import List
-
 from wordcloud import WordCloud
 from dash import html
 import spacy
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+from transformers import (
+    TokenClassificationPipeline,
+    AutoModelForTokenClassification,
+    AutoTokenizer,
+)
+from transformers.pipelines import AggregationStrategy
+import numpy as np
+from transformers import AutoTokenizer, AutoModelForSequenceClassification
+import torch
+import torch.nn.functional as F
+import nltk
+from nltk.tokenize import sent_tokenize
+from nltk.sentiment import SentimentIntensityAnalyzer
+
+
+# Define keyphrase extraction pipeline
+class KeyphraseExtractionPipeline(TokenClassificationPipeline):
+    def __init__(self, model, *args, **kwargs):
+        super().__init__(
+            model=AutoModelForTokenClassification.from_pretrained(model),
+            tokenizer=AutoTokenizer.from_pretrained(model),
+            *args,
+            **kwargs,
+        )
+
+    def postprocess(self, all_outputs):
+        results = super().postprocess(
+            all_outputs=all_outputs,
+            aggregation_strategy=AggregationStrategy.FIRST,
+        )
+        return np.unique([result.get("word").strip() for result in results])
 
 
 class WordCloudWidget:
@@ -25,12 +55,17 @@ class WordCloudWidget:
             path = f"data/articles/{art}.txt"
             with open(path, "r") as file:
                 text = file.read()
-                phrases = self.extract_entity_related_phrases(text, entity)
+                phrases = self.get_key_phrases(text, entity)
+                sentiment = self.classify_aspect_sentiment(text, entity)
+                print("sentiment", sentiment)
                 for phrase in phrases:
                     phrases_list.append(phrase)
+                print(phrases_list)
+        phrases_list = phrases_list[:7]
         if not phrases_list:
             phrases_list = ["empty"]
         text = " ".join(phrase.replace(" ", "_") for phrase in phrases_list)
+
         wc = WordCloud(
             width=self.width,
             height=self.height,
@@ -44,59 +79,86 @@ class WordCloudWidget:
         image = f"data:image/png;base64,{encoded}"
         return html.Img(src=image, style={"maxWidth": "100%", "height": "auto"})
 
-    def contains_polar_word(self, phrase):
-        analyzer = SentimentIntensityAnalyzer()
-        lexicon = analyzer.lexicon
-        words = phrase.lower().split()
-        return any(word in lexicon for word in words)
+    def get_key_phrases(self, text, entity):
+        model_name = "ml6team/keyphrase-extraction-distilbert-inspec"
+        extractor = KeyphraseExtractionPipeline(model=model_name)
 
-    def clean_text(self, text):
-        return " ".join(text.strip().split())
+        # Split into sentences
+        sentences = self.custom_sentence_split(text)
 
-    def phrase_mentions_entity(self, phrase, entity_name):
-        entity_name = entity_name.lower()
-        phrase = phrase.lower()
-        entity_tokens = entity_name.split()
-        return any(token in phrase for token in entity_tokens)
+        # Filter sentences mentioning the company
+        entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
+        # print(entity_sentences)
+        text = " ".join(entity_sentences)
 
-    def extract_entity_related_phrases(self, text, entity_name):
+        model_phrases = extractor(text)
+        model_phrases = [str(s) for s in model_phrases.tolist()]
+        nlp_phrases = self.extract_polar_chunks(text, entity)
+
+        key_phrases = set(nlp_phrases + model_phrases)
+
+        return key_phrases
+
+    def classify_aspect_sentiment(self, text, entity):
+        model_name = "yangheng/deberta-v3-base-absa-v1.1"
+        tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=False)
+
+        model = AutoModelForSequenceClassification.from_pretrained(model_name)
+
+        # Tokenize the sentence with the aspect as text_pair
+        inputs = tokenizer(text, entity, return_tensors="pt", truncation=True)
+
+        # Run the model
+        with torch.no_grad():
+            outputs = model(**inputs)
+
+        # Get logits and softmax probabilities
+        logits = outputs.logits
+        probs = F.softmax(logits, dim=1)
+
+        # Map index to sentiment label (usually 0: negative, 1: neutral, 2: positive)
+        labels = ["Negative", "Neutral", "Positive"]
+        print(probs)
+        pred = torch.argmax(probs, dim=1).item()
+        confidence = probs[0, pred].item()
+
+        return {"aspect": entity, "sentiment": labels[pred], "confidence": round(confidence, 3)}
+
+    def extract_polar_chunks(self, text, entity):
+        # Load spaCy model (small English model)
         nlp = spacy.load("en_core_web_sm")
-        doc = nlp(text)
-        phrases = set()
 
-        for sent in doc.sents:
-            sent_text = self.clean_text(sent.text)
-            sent_doc = nlp(sent_text)
+        # Initialize VADER sentiment analyzer
+        sia = SentimentIntensityAnalyzer()
+        # Split into sentences
+        sentences = self.custom_sentence_split(text)
+        # Filter sentences mentioning the company
+        entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
 
-            # Proceed only if entity mentioned in sentence
-            if entity_name.lower() not in sent_text.lower():
+        chunk_polarities = []
+
+        for sent in entity_sentences:
+            doc = nlp(sent)
+
+            for chunk in doc.noun_chunks:
+                text = chunk.text
+                # Get polarity score (compound) for the chunk text
+                polarity = sia.polarity_scores(text)["compound"]
+                if polarity != 0:
+                    chunk_polarities.append(text)
+
+        return chunk_polarities
+
+    def custom_sentence_split(self, text):
+        # Split text into blocks using double newlines (titles/paragraphs)
+        blocks = text.split("\n\n")
+
+        sentences = []
+        for block in blocks:
+            block = block.strip()
+            if not block:
                 continue
+            # Further split using sent_tokenize for real sentence boundaries
+            sentences.extend(sent_tokenize(block))
 
-            # Extract noun chunks mentioning the entity or containing sentiment words
-            for chunk in sent_doc.noun_chunks:
-                chunk_text = self.clean_text(chunk.text)
-                if (
-                    self.phrase_mentions_entity(chunk_text, entity_name) or self.contains_polar_word(chunk_text)
-                ) and 2 <= len(chunk_text.split()) <= 10:
-                    phrases.add(chunk_text)
-
-            # Extract verb phrases with entity as subject/object and polar words
-            for token in sent_doc:
-                if token.pos_ in ("VERB", "AUX") and self.contains_polar_word(token.text):
-                    subjects = [child for child in token.children if child.dep_ in ("nsubj", "nsubjpass")]
-                    objects = [child for child in token.children if child.dep_ in ("dobj", "obj")]
-
-                    subject_related = any(self.phrase_mentions_entity(sub.text, entity_name) for sub in subjects)
-                    object_related = any(self.phrase_mentions_entity(obj.text, entity_name) for obj in objects)
-
-                    if subject_related or object_related:
-                        phrase_tokens = [token]
-                        for child in token.children:
-                            if child.dep_ in ("dobj", "prep", "xcomp", "acomp"):
-                                phrase_tokens.extend(list(child.subtree))
-                        phrase_tokens = sorted(set(phrase_tokens), key=lambda t: t.i)
-                        phrase_text = self.clean_text(" ".join([t.text for t in phrase_tokens]))
-                        if 2 <= len(phrase_text.split()) <= 12:
-                            phrases.add(phrase_text)
-
-        return list(phrases)
+        return sentences
