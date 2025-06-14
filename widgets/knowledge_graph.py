@@ -1,6 +1,6 @@
 import json
 import networkx as nx
-import community as community_louvain
+import community.community_louvain as community_louvain
 import plotly.graph_objects as go
 from dash import dcc
 
