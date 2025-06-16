@@ -146,7 +146,7 @@ class WordCloudWidget:
             Tuple[str, float]: Sentiment label ("negative", "neutral", or "positive") and sentiment score.
                               Score is negative for negative sentiment, zero for neutral, and positive for positive.
         """
-        inputs = self.tokenizer(text, entity, return_tensors="pt", truncation=True)
+        inputs = self.tokenizer(text, entity, return_tensors="pt")
         with torch.no_grad():
             outputs = self.polarity_model(**inputs)
         probs = F.softmax(outputs.logits, dim=1)

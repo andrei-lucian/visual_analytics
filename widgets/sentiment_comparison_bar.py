@@ -76,11 +76,14 @@ class DivergingSentimentPlot:
 		fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="gray")
 
 		fig.update_layout(
-			autosize=True,
-			margin=dict(l=20, r=20, t=40, b=20),
+			title="Sentiment Comparison of Articles",
+			xaxis_title="Sentiment Score",
+			yaxis_title="Article",
+			xaxis_range=[-1, 1],
+			bargap=0.5,
 			paper_bgcolor="#001f3f",  
 			plot_bgcolor="#001f3f",
-			font=dict(color="#cce6ff"),
+			font=dict(color="#cce6ff"), 
 		)
 
 		return fig
@@ -113,7 +116,7 @@ class DivergingSentimentPlot:
 				model = AutoModelForSequenceClassification.from_pretrained(model_name)
 
 				# Tokenize the concatenated sentences with the aspect as text_pair
-				inputs = tokenizer(entity_sentences, entity, return_tensors="pt", truncation=True)
+				inputs = tokenizer(entity_sentences, entity, return_tensors="pt")
 
 				# Run model inference without gradient calculation
 				with torch.no_grad():
