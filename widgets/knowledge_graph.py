@@ -169,6 +169,8 @@ class KnowledgeGraphPlot:
             title="Knowledge Graph (Filtered by Edge Type)",
             title_font_size=16,
             showlegend=True,
+            paper_bgcolor="#001f3f",  
+			plot_bgcolor="#001f3f",
             hovermode="closest",
             margin=dict(b=20, l=5, r=5, t=40),
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),

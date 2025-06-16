@@ -168,11 +168,21 @@ class Heatmap:
 
         # Layout customization
         fig.update_layout(
-            coloraxis_colorbar=dict(title="Sentiment"),
-            plot_bgcolor="white",
-            paper_bgcolor="white",
-            margin=dict(t=50, l=100),
-            xaxis=dict(tickangle=0),
+				coloraxis_colorbar=dict(title="Sentiment"),
+				paper_bgcolor="#001f3f",  
+				plot_bgcolor="#001f3f",
+				xaxis=dict(
+				tickangle=0,
+				color='white',           
+				tickfont=dict(color='white'),
+				),
+				yaxis=dict(
+					color='white',           
+					tickfont=dict(color='white'),
+				),
+				font=dict(
+					color='white'  
+			),
         )
         fig.update_traces(
             z=heatmap_data.to_numpy(),

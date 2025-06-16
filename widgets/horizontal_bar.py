@@ -202,6 +202,17 @@ class HorizontalBarPlot:
 			yaxis_title="Edge Type",
 			legend_title="Algorithm",
 			shapes=shapes,
+			xaxis=dict(
+				tickangle=45,
+				tickfont=dict(size=12, color="#cce6ff"),
+			),
+			yaxis=dict(
+				tickfont=dict(color="#cce6ff"),
+				title="Count",
+			),
+			font=dict(color="#cce6ff"),  
+			paper_bgcolor="#001f3f",  
+			plot_bgcolor="white",   
 		)
 		return fig
 
