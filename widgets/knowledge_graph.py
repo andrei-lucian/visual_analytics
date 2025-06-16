@@ -61,9 +61,7 @@ class KnowledgeGraphPlot:
             networkx.Graph: Subgraph containing only the filtered edges.
         """
         G = nx.node_link_graph(self.data, edges="links").to_undirected()
-        filtered_edges = [
-            (u, v, k) for u, v, k, d in G.edges(keys=True, data=True) if d.get("type") in selected_types
-        ]
+        filtered_edges = [(u, v, k) for u, v, k, d in G.edges(keys=True, data=True) if d.get("type") in selected_types]
         return G.edge_subgraph(filtered_edges).copy()
 
     def generate_figure(self, selected_types, highlight_node_id=None):
@@ -169,8 +167,8 @@ class KnowledgeGraphPlot:
             title="Knowledge Graph (Filtered by Edge Type)",
             title_font_size=16,
             showlegend=True,
-            paper_bgcolor="#001f3f",  
-			plot_bgcolor="#001f3f",
+            paper_bgcolor="rgba(0,0,0,0)",
+            plot_bgcolor="white",
             hovermode="closest",
             margin=dict(b=20, l=5, r=5, t=40),
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=False),

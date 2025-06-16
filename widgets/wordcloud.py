@@ -222,17 +222,21 @@ class WordCloudWidget:
         return html.Div(
             id=self.id or "phrase-tags",
             style={
-                "height": "300px",
-                "overflowY": "auto",
-                "padding": "10px",
-                "backgroundColor": "#001f3f",  # updated background color here
-                "borderRadius": "12px",
-                "marginBottom": "20px",
+                "borderRadius": "8px",
+                "color": "#001f3f",
+                "fontStyle": "italic",
+                "fontSize": "1.1rem",
+                "padding": "0",
+                "margin": "0",
+                "backgroundColor": "#B9D3F6",
+                "flexShrink": 0,
+                "flexGrow": 0,
                 "display": "flex",
                 "flexWrap": "wrap",
-                "alignContent": "flex-start",
-                "gap": "12px",
-                "justifyContent": "center",
+                "justifyContent": "flex-start",
+                "alignItems": "flex-start",
+                "gap": "6px",
+                "padding": "12px 16px",
             },
             children=[
                 html.Span(

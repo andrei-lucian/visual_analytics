@@ -65,6 +65,10 @@ button:hover {
     font-size: 13px !important;
 }
 
+.main-svg {
+    background: transparent !important;
+  }
+  
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .section-container {

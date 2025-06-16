@@ -48,6 +48,8 @@ def create_layout():
                             "width": "30%",
                             "display": "flex",
                             "flexDirection": "column",
+                            "backgroundColor": "#B9D3F6",
+                            "borderRadius": "12px",  # <-- rounded corners here
                         },
                         children=[
                             html.Div(
@@ -57,6 +59,7 @@ def create_layout():
                                     "borderRadius": "8px",
                                     "padding": "0",
                                     "margin": "0",
+                                    "backgroundColor": "#B9D3F6",
                                 },
                             ),
                         ],
@@ -68,6 +71,8 @@ def create_layout():
                             "display": "flex",
                             "flexDirection": "column",
                             "gap": "10px",
+                            "backgroundColor": "#B9D3F6",
+                            "borderRadius": "12px",  # <-- rounded corners here
                         },
                         children=[
                             html.Div(edge_type_dropdown.render(), style={"height": "40px"}),
@@ -75,8 +80,8 @@ def create_layout():
                                 knowledge_graph.render(),
                                 style={
                                     "flex": "1",
-                                    "borderRadius": "8px",
-                                    "backgroundColor": "#fafafa",
+                                    "borderRadius": "12px",  # <-- rounded corners here
+                                    "backgroundColor": "#B9D3F6",
                                     "padding": "0",
                                     "margin": "0",
                                 },
@@ -106,6 +111,7 @@ def create_layout():
                                     "fontSize": "1.1rem",
                                     "padding": "0",
                                     "margin": "0",
+                                    "backgroundColor": "#B9D3F6",
                                 },
                                 children=[
                                     dcc.Loading(
@@ -124,31 +130,33 @@ def create_layout():
                                 ],
                             ),
                             # Sentiment
-							html.Div(
-								style={
-									"flex": "1",
-									"borderRadius": "8px",
-									"display": "flex",
-									"flexDirection": "column",
-									"color": "#001f3f",
-									"fontStyle": "italic",
-									"fontSize": "1.1rem",
-									"padding": "0",
-									"margin": "0",
-									"overflow": "hidden",
-								},
-								children=[
-									dcc.Loading(
-										id="loading-sentiment",
-										type="circle",
-										children=html.Div(
-											id="sentiment-container",
-											style={"flex": "1", "width": "100%", "height": "100%"},
-											children=[
-												html.Div(
-													"Click on the heatmap to load sentiment comparison",
-													style={"marginBottom": "10px"},
-												),
+                            html.Div(
+                                style={
+                                    "flex": "1",
+                                    "borderRadius": "8px",
+                                    "display": "flex",
+                                    "flexDirection": "column",
+                                    "justifyContent": "center",
+                                    "alignItems": "center",
+                                    "color": "#001f3f",
+                                    "fontStyle": "italic",
+                                    "fontSize": "1.1rem",
+                                    "padding": "0",
+                                    "margin": "0",
+                                    "backgroundColor": "#B9D3F6",
+                                },
+                                children=[
+                                    dcc.Loading(
+                                        id="loading-sentiment",
+                                        type="circle",
+                                        children=html.Div(
+                                            id="sentiment-container",
+                                            style={"flex": "1", "width": "100%", "height": "100%"},
+                                            children=[
+                                                html.Div(
+                                                    "Click on the heatmap to load sentiment comparison",
+                                                    style={"marginBottom": "10px"},
+                                                ),
                                             ],
                                         ),
                                     ),
@@ -167,16 +175,6 @@ def create_layout():
                     "gap": "15px",
                 },
                 children=[
-                    # Stream Graph (50%)
-                    html.Div(
-                        stream_graph.render(),
-                        style={
-                            "width": "50%",
-                            "borderRadius": "8px",
-                            "padding": "0",
-                            "margin": "0",
-                        },
-                    ),
                     # Horizontal Bar (50%)
                     html.Div(
                         horizontal_bar.render(),
@@ -185,6 +183,20 @@ def create_layout():
                             "borderRadius": "8px",
                             "padding": "0",
                             "margin": "0",
+                            "backgroundColor": "#B9D3F6",
+                            "borderRadius": "12px",  # <-- rounded corners here
+                        },
+                    ),
+                    # Stream Graph (50%)
+                    html.Div(
+                        stream_graph.render(),
+                        style={
+                            "width": "50%",
+                            "borderRadius": "8px",
+                            "padding": "0",
+                            "margin": "0",
+                            "backgroundColor": "#B9D3F6",
+                            "borderRadius": "12px",  # <-- rounded corners here
                         },
                     ),
                 ],

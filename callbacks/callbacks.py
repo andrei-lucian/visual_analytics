@@ -67,15 +67,22 @@ def register_callbacks(app):
         triggered = callback_context.triggered[0]["prop_id"].split(".")[0]
 
         if triggered == "graph":
-            placeholder_style = {
-                "display": "flex",
-                "justifyContent": "center",
-                "alignItems": "center",
-                "color": "#a8c7e7",
-                "fontStyle": "italic",
-                "backgroundColor": "#1a1f2b",
-                "borderRadius": "12px",
-            }
+            placeholder_style = (
+                {
+                    "flex": "1",
+                    "borderRadius": "8px",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "justifyContent": "center",
+                    "alignItems": "center",
+                    "color": "#001f3f",
+                    "fontStyle": "italic",
+                    "fontSize": "1.1rem",
+                    "padding": "0",
+                    "margin": "0",
+                    "backgroundColor": "#B9D3F6",
+                },
+            )
             company_name = graph_click["points"][0]["text"].split("Node: ")[1].split("<br>")[0]
             horizontal_bar._prepare_plot_df(company_name, None)
             stream_graph._prepare_plot_df(company_name, None)

@@ -5,224 +5,222 @@ from dash import dcc
 
 
 class HorizontalBarPlot:
-	"""
-	A class to create a horizontal bar chart comparing edge type frequencies between
-	two algorithms: BassLine and ShadGPT.
+    """
+    A class to create a horizontal bar chart comparing edge type frequencies between
+    two algorithms: BassLine and ShadGPT.
 
-	Attributes:
-	-----------
-	data : dict
-		Input graph data containing 'nodes' and 'links'.
-	html_id : str
-		The ID for the Dash component.
-	edge_type_sentiment : dict
-		Mapping of edge types to sentiment categories.
-	df_nodes : pd.DataFrame
-		DataFrame containing node data.
-	df_links : pd.DataFrame
-		DataFrame containing link (edge) data.
-	edge_types_available : list
-		Sorted list of all unique edge types based on sentiment order.
-	color_map : dict
-		Maps algorithm names to color codes.
-	df_plot : pd.DataFrame
-		Prepared DataFrame for plotting.
-	fig : plotly.graph_objects.Figure
-		The plotly figure generated.
-	"""
+    Attributes:
+    -----------
+    data : dict
+            Input graph data containing 'nodes' and 'links'.
+    html_id : str
+            The ID for the Dash component.
+    edge_type_sentiment : dict
+            Mapping of edge types to sentiment categories.
+    df_nodes : pd.DataFrame
+            DataFrame containing node data.
+    df_links : pd.DataFrame
+            DataFrame containing link (edge) data.
+    edge_types_available : list
+            Sorted list of all unique edge types based on sentiment order.
+    color_map : dict
+            Maps algorithm names to color codes.
+    df_plot : pd.DataFrame
+            Prepared DataFrame for plotting.
+    fig : plotly.graph_objects.Figure
+            The plotly figure generated.
+    """
 
-	def __init__(self, data, html_id):
-		self.html_id = html_id
-		self.data = data
+    def __init__(self, data, html_id):
+        self.html_id = html_id
+        self.data = data
 
-		# Mapping edge types to sentiment categories
-		self.edge_type_sentiment = {
-			"Event.Applaud": "positive",
-			"Event.Aid": "positive",
-			"Event.Invest": "positive",
-			"Event.Fishing.SustainableFishing": "positive",
-			"Event.Criticize": "negative",
-			"Event.Convicted": "negative",
-			"Event.CertificateIssued.Summons": "negative",
-			"Event.Fishing.OverFishing": "negative",
-			"Event.CertificateIssued": "neutral",
-			"Event.Transaction": "neutral",
-			"Event.Fishing": "neutral",
-			"Event.Owns.PartiallyOwns": "neutral",
-			"Event.Communication.Conference": "neutral",
-		}
+        # Mapping edge types to sentiment categories
+        self.edge_type_sentiment = {
+            "Event.Applaud": "positive",
+            "Event.Aid": "positive",
+            "Event.Invest": "positive",
+            "Event.Fishing.SustainableFishing": "positive",
+            "Event.Criticize": "negative",
+            "Event.Convicted": "negative",
+            "Event.CertificateIssued.Summons": "negative",
+            "Event.Fishing.OverFishing": "negative",
+            "Event.CertificateIssued": "neutral",
+            "Event.Transaction": "neutral",
+            "Event.Fishing": "neutral",
+            "Event.Owns.PartiallyOwns": "neutral",
+            "Event.Communication.Conference": "neutral",
+        }
 
-		self.df_nodes, self.df_links = self._create_dfs()
-		self.edge_types_available = self._get_edge_types()
-		self.color_map = self._generate_color_map()
-		self._prepare_plot_df(None)
-		self.fig = self.generate_figure()
+        self.df_nodes, self.df_links = self._create_dfs()
+        self.edge_types_available = self._get_edge_types()
+        self.color_map = self._generate_color_map()
+        self._prepare_plot_df(None)
+        self.fig = self.generate_figure()
 
-	def _create_dfs(self):
-		"""Create DataFrames from raw node/link JSON structures."""
-		nodes = self.data["nodes"]
-		links = self.data["links"]
-		return pd.DataFrame(nodes), pd.DataFrame(links)
+    def _create_dfs(self):
+        """Create DataFrames from raw node/link JSON structures."""
+        nodes = self.data["nodes"]
+        links = self.data["links"]
+        return pd.DataFrame(nodes), pd.DataFrame(links)
 
-	def _get_edge_types(self):
-		"""Get unique edge types sorted by sentiment (neg → neu → pos)."""
-		types = self.df_links["type"].unique()
-		sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
-		return sorted(types, key=lambda x: sentiment_order.get(self.edge_type_sentiment.get(x, "neutral"), 1))
+    def _get_edge_types(self):
+        """Get unique edge types sorted by sentiment (neg → neu → pos)."""
+        types = self.df_links["type"].unique()
+        sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
+        return sorted(types, key=lambda x: sentiment_order.get(self.edge_type_sentiment.get(x, "neutral"), 1))
 
-	def _generate_color_map(self):
-		"""Assign numeric codes to algorithms for color mapping."""
-		return {"BassLine": 0, "ShadGPT": 1}
+    def _generate_color_map(self):
+        """Assign numeric codes to algorithms for color mapping."""
+        return {"BassLine": 0, "ShadGPT": 1}
 
-	def _counts_to_full_dict(self, counts, all_types):
-		"""Ensure all edge types are present in count dictionary."""
-		return {t: counts.get(t, 0) for t in all_types}
+    def _counts_to_full_dict(self, counts, all_types):
+        """Ensure all edge types are present in count dictionary."""
+        return {t: counts.get(t, 0) for t in all_types}
 
-	def _prepare_plot_df(self, selected_point=None, heatmap_filter=None):
-		"""
-		Prepare the plot DataFrame based on selection and optional filter.
+    def _prepare_plot_df(self, selected_point=None, heatmap_filter=None):
+        """
+        Prepare the plot DataFrame based on selection and optional filter.
 
-		Parameters:
-		-----------
-		selected_point : str or None
-			The node selected from the graph.
-		heatmap_filter : tuple(str, str) or None
-			A (month, source) tuple for additional filtering.
-		"""
-		if selected_point is None:
-			# Default to root company if nothing selected
-			filtered_df = self.df_links[
-				(self.df_links["source"] == "Namorna Transit Ltd") |
-				(self.df_links["target"] == "Namorna Transit Ltd")
-			]
-		else:
-			filtered_df = self.df_links[
-				(self.df_links["source"] == selected_point) |
-				(self.df_links["target"] == selected_point)
-			]
+        Parameters:
+        -----------
+        selected_point : str or None
+                The node selected from the graph.
+        heatmap_filter : tuple(str, str) or None
+                A (month, source) tuple for additional filtering.
+        """
+        if selected_point is None:
+            # Default to root company if nothing selected
+            filtered_df = self.df_links[
+                (self.df_links["source"] == "Namorna Transit Ltd") | (self.df_links["target"] == "Namorna Transit Ltd")
+            ]
+        else:
+            filtered_df = self.df_links[
+                (self.df_links["source"] == selected_point) | (self.df_links["target"] == selected_point)
+            ]
 
-			# Apply date/source filtering if heatmap clicked
-			if heatmap_filter is not None:
-				filtered_df = filtered_df.copy()
-				filtered_df['_date_added'] = pd.to_datetime(filtered_df['_date_added'])
+            # Apply date/source filtering if heatmap clicked
+            if heatmap_filter is not None:
+                filtered_df = filtered_df.copy()
+                filtered_df["_date_added"] = pd.to_datetime(filtered_df["_date_added"])
 
-				filter_date = pd.to_datetime(heatmap_filter[0])
-				filter_source = heatmap_filter[1]
+                filter_date = pd.to_datetime(heatmap_filter[0])
+                filter_source = heatmap_filter[1]
 
-				filtered_df = filtered_df[
-					(filtered_df['_date_added'].dt.year == filter_date.year) &
-					(filtered_df['_date_added'].dt.month == filter_date.month) &
-					(filtered_df['_raw_source'] == filter_source)
-				]
+                filtered_df = filtered_df[
+                    (filtered_df["_date_added"].dt.year == filter_date.year)
+                    & (filtered_df["_date_added"].dt.month == filter_date.month)
+                    & (filtered_df["_raw_source"] == filter_source)
+                ]
 
-		# Split by algorithm
-		df_baseline = filtered_df[filtered_df["_algorithm"] == "BassLine"]
-		df_shadgpt = filtered_df[filtered_df["_algorithm"] == "ShadGPT"]
+        # Split by algorithm
+        df_baseline = filtered_df[filtered_df["_algorithm"] == "BassLine"]
+        df_shadgpt = filtered_df[filtered_df["_algorithm"] == "ShadGPT"]
 
-		all_types = self.edge_types_available
+        all_types = self.edge_types_available
 
-		# Count edge types
-		counts_baseline = df_baseline["type"].value_counts()
-		counts_shadgpt = df_shadgpt["type"].value_counts()
+        # Count edge types
+        counts_baseline = df_baseline["type"].value_counts()
+        counts_shadgpt = df_shadgpt["type"].value_counts()
 
-		# Normalize counts to include all types
-		counts_baseline_full = self._counts_to_full_dict(counts_baseline, all_types)
-		counts_shadgpt_full = self._counts_to_full_dict(counts_shadgpt, all_types)
+        # Normalize counts to include all types
+        counts_baseline_full = self._counts_to_full_dict(counts_baseline, all_types)
+        counts_shadgpt_full = self._counts_to_full_dict(counts_shadgpt, all_types)
 
-		# Combine into DataFrame for plotting
-		df_plot = pd.DataFrame([counts_baseline_full, counts_shadgpt_full])
-		df_plot["_algorithm"] = ["BassLine", "ShadGPT"]
-		df_plot["_algorithm_code"] = df_plot["_algorithm"].map(self.color_map)
+        # Combine into DataFrame for plotting
+        df_plot = pd.DataFrame([counts_baseline_full, counts_shadgpt_full])
+        df_plot["_algorithm"] = ["BassLine", "ShadGPT"]
+        df_plot["_algorithm_code"] = df_plot["_algorithm"].map(self.color_map)
 
-		self.df_plot = df_plot
+        self.df_plot = df_plot
 
-	def generate_figure(self):
-		"""
-		Create the horizontal bar plot comparing edge type counts.
+    def generate_figure(self):
+        """
+        Create the horizontal bar plot comparing edge type counts.
 
-		Returns:
-		--------
-		fig : plotly.graph_objects.Figure
-			The constructed Plotly figure object.
-		"""
-		fig = go.Figure()
+        Returns:
+        --------
+        fig : plotly.graph_objects.Figure
+                The constructed Plotly figure object.
+        """
+        fig = go.Figure()
 
-		# Define bar colors
-		colors = {"BassLine": "blue", "ShadGPT": "orange"}
+        # Define bar colors
+        colors = {"BassLine": "blue", "ShadGPT": "orange"}
 
-		# Plot bars for each algorithm
-		for alg in ["BassLine", "ShadGPT"]:
-			df_alg = self.df_plot[self.df_plot["_algorithm"] == alg]
-			fig.add_trace(
-				go.Bar(
-					y=self.edge_types_available,
-					x=df_alg[self.edge_types_available].values.flatten(),
-					name=alg,
-					orientation="h",
-					marker_color=colors.get(alg, "gray"),
-				)
-			)
+        # Plot bars for each algorithm
+        for alg in ["BassLine", "ShadGPT"]:
+            df_alg = self.df_plot[self.df_plot["_algorithm"] == alg]
+            fig.add_trace(
+                go.Bar(
+                    y=self.edge_types_available,
+                    x=df_alg[self.edge_types_available].values.flatten(),
+                    name=alg,
+                    orientation="h",
+                    marker_color=colors.get(alg, "gray"),
+                )
+            )
 
-		# Add colored background bands for sentiment categories
-		shapes = []
-		y_labels = list(self.edge_types_available)
-		sentiment_groups = {"negative": "red", "neutral": "white", "positive": "green"}
-		y_index = {label: i for i, label in enumerate(y_labels)}
-		current_group = None
-		start = None
+        # Add colored background bands for sentiment categories
+        shapes = []
+        y_labels = list(self.edge_types_available)
+        sentiment_groups = {"negative": "red", "neutral": "white", "positive": "green"}
+        y_index = {label: i for i, label in enumerate(y_labels)}
+        current_group = None
+        start = None
 
-		for i, label in enumerate(y_labels + [None]):  # sentinel for final group
-			sentiment = self.edge_type_sentiment.get(label, "neutral") if label else None
-			if sentiment != current_group:
-				if current_group is not None:
-					y0 = y_index[y_labels[start]] - 0.5
-					y1 = y_index[y_labels[i - 1]] + 0.5
-					shapes.append(
-						dict(
-							type="rect",
-							xref="paper",
-							yref="y",
-							x0=0,
-							x1=1,
-							y0=y0,
-							y1=y1,
-							fillcolor=sentiment_groups[current_group],
-							opacity=0.2,
-							layer="below",
-							line_width=0,
-						)
-					)
-				current_group = sentiment
-				start = i
+        for i, label in enumerate(y_labels + [None]):  # sentinel for final group
+            sentiment = self.edge_type_sentiment.get(label, "neutral") if label else None
+            if sentiment != current_group:
+                if current_group is not None:
+                    y0 = y_index[y_labels[start]] - 0.5
+                    y1 = y_index[y_labels[i - 1]] + 0.5
+                    shapes.append(
+                        dict(
+                            type="rect",
+                            xref="paper",
+                            yref="y",
+                            x0=0,
+                            x1=1,
+                            y0=y0,
+                            y1=y1,
+                            fillcolor=sentiment_groups[current_group],
+                            opacity=0.2,
+                            layer="below",
+                            line_width=0,
+                        )
+                    )
+                current_group = sentiment
+                start = i
 
-		fig.update_layout(
-			barmode="group",
-			title="Edge Type Counts by Algorithm",
-			xaxis_title="Count",
-			yaxis_title="Edge Type",
-			legend_title="Algorithm",
-			shapes=shapes,
-			xaxis=dict(
-				tickangle=45,
-				tickfont=dict(size=12, color="#cce6ff"),
-			),
-			yaxis=dict(
-				tickfont=dict(color="#cce6ff"),
-				title="Count",
-			),
-			font=dict(color="#cce6ff"),  
-			paper_bgcolor="#001f3f",  
-			plot_bgcolor="white",   
-		)
-		return fig
+        fig.update_layout(
+            barmode="group",
+            title="Edge Type Counts by Algorithm",
+            xaxis_title="Count",
+            yaxis_title="Edge Type",
+            legend_title="Algorithm",
+            shapes=shapes,
+            xaxis=dict(
+                tickfont=dict(size=14, color="white"),
+            ),
+            yaxis=dict(
+                tickangle=45,
+                tickfont=dict(color="white", size=14),
+                title="Count",
+            ),
+            font=dict(color="white", size=16),
+            paper_bgcolor="#B9D3F6",
+            plot_bgcolor="white",
+        )
+        return fig
 
-	def render(self):
-		"""
-		Return the Dash component to render the bar chart.
+    def render(self):
+        """
+        Return the Dash component to render the bar chart.
 
-		Returns:
-		--------
-		dcc.Graph
-			The graph component for Dash layout.
-		"""
-		return dcc.Graph(id=self.html_id, figure=self.fig)
+        Returns:
+        --------
+        dcc.Graph
+                The graph component for Dash layout.
+        """
+        return dcc.Graph(id=self.html_id, figure=self.fig)
