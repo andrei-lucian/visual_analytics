@@ -185,14 +185,14 @@ class StreamGraph:
         fig.update_layout(
             xaxis=dict(
                 tickangle=45,
-                tickfont=dict(size=12, color="#cce6ff"),
+                tickfont=dict(size=14, color="#083B6E"),
             ),
             yaxis=dict(
-                tickfont=dict(color="#cce6ff"),
+                tickfont=dict(color="#083B6E", size=14),
                 title="Count",
             ),
-            font=dict(color="#cce6ff"),
-            legend_title=dict(font=dict(color="#cce6ff")),
+            font=dict(color="#083B6E", size=16),
+            legend_title=dict(font=dict(color="#083B6E")),
             paper_bgcolor="#B9D3F6",
             plot_bgcolor="white",
         )

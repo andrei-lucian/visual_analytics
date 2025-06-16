@@ -201,14 +201,13 @@ class HorizontalBarPlot:
             legend_title="Algorithm",
             shapes=shapes,
             xaxis=dict(
-                tickfont=dict(size=14, color="white"),
+                tickfont=dict(size=14, color="#083B6E"),
             ),
             yaxis=dict(
-                tickangle=45,
-                tickfont=dict(color="white", size=14),
+                tickfont=dict(color="#083B6E", size=14),
                 title="Count",
             ),
-            font=dict(color="white", size=16),
+            font=dict(color="#083B6E", size=16),
             paper_bgcolor="#B9D3F6",
             plot_bgcolor="white",
         )

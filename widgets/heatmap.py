@@ -151,7 +151,6 @@ class Heatmap:
             color_continuous_scale=[[0.0, "red"], [0.5, "white"], [1.0, "green"]],
             aspect="auto",
             labels=dict(x="Month", y="News Source", color="Sentiment Score"),
-            title=f"Sentiment Toward {self.company_name} Over Time (by Source, extracted from triplet database)",
         )
 
         # Update heatmap trace
@@ -169,14 +168,22 @@ class Heatmap:
         # Layout customization
         fig.update_layout(
             coloraxis_colorbar=dict(title="Sentiment"),
+            margin=dict(t=100),
             paper_bgcolor="#B9D3F6",
             plot_bgcolor="white",
-            xaxis=dict(tickangle=0, color="white", tickfont=dict(color="white", size=14)),
+            xaxis=dict(tickangle=0, color="#083B6E", tickfont=dict(color="#083B6E", size=14)),
             yaxis=dict(
-                color="white",
-                tickfont=dict(color="white", size=14),
+                color="#083B6E",
+                tickfont=dict(color="#083B6E", size=14),
             ),
-            font=dict(color="white", size=16),
+            title=dict(
+                text=f"Sentiment Toward {self.company_name} Over Time <br>"
+                "(by Source, extracted from triplet database)",  # your title text (can have <br> for line breaks)
+                x=0.5,  # center horizontally (0 = left, 1 = right)
+                xanchor="center",  # anchor the title center on that x position
+                font=dict(size=20),  # optional: adjust font size
+            ),
+            font=dict(color="#083B6E", size=16),
         )
         fig.update_traces(
             z=heatmap_data.to_numpy(),

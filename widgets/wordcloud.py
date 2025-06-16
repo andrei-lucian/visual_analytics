@@ -236,7 +236,7 @@ class WordCloudWidget:
                 "justifyContent": "flex-start",
                 "alignItems": "flex-start",
                 "gap": "6px",
-                "padding": "12px 16px",
+                "padding": "10px",
             },
             children=[
                 html.Span(

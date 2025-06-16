@@ -25,8 +25,9 @@ stream_graph = StreamGraph(data=data, html_id="stream_graph")
 def create_layout():
     return html.Div(
         style={
-            "width": "100vw",
-            "height": "100vh",
+            "maxwidth": "100%",
+            "maxheight": "100%",
+            # "height": "100vh",
             "display": "flex",
             "flexDirection": "column",
             "padding": "20px 40px",
@@ -144,7 +145,7 @@ def create_layout():
                                     "padding": "10px",
                                     "margin": "0",
                                     "overflow": "auto",
-                                    "boxSizing": "border-box" ,
+                                    "boxSizing": "border-box",
                                     "backgroundColor": "#B9D3F6",
                                 },
                                 children=[

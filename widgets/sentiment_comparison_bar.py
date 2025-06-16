@@ -96,7 +96,7 @@ class DivergingSentimentPlot:
             bargap=0.5,
             paper_bgcolor="#001f3f",
             plot_bgcolor="#001f3f",
-            font=dict(color="#cce6ff"),
+            font=dict(color="#083B6E"),
         )
 
         return fig
