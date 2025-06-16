@@ -9,17 +9,17 @@ def register_callbacks(app):
     Register all Dash callback functions for interactivity.
 
     This function connects the UI elements (graph, dropdown, heatmap, wordcloud, sentiment bars, etc.)
-    with their corresponding logic using Dash callbacks. It enables dynamic behavior when users 
+    with their corresponding logic using Dash callbacks. It enables dynamic behavior when users
     interact with the app, such as clicking on nodes in the graph or cells in the heatmap.
 
     Callbacks Registered:
     ---------------------
     1. update_graph:
         Updates the network graph visualization based on selected edge types and clicked node.
-    
+
     2. update_heatmap:
         Updates the sentiment heatmap based on the node selected in the graph.
-    
+
     3. update_all_outputs:
         Updates the word cloud, horizontal bar chart, stream graph, and sentiment comparison
         when a heatmap cell is clicked. Falls back to placeholder messages when only the graph is clicked.
@@ -33,7 +33,7 @@ def register_callbacks(app):
     --------
     None
     """
-    
+
     @app.callback(Output("graph", "figure"), Input("dropdown", "value"), Input("graph", "clickData"))
     def update_graph(selected_edge_types, clicked_node_id):
         if not selected_edge_types:
@@ -76,14 +76,16 @@ def register_callbacks(app):
                 "backgroundColor": "#1a1f2b",
                 "borderRadius": "12px",
             }
-
+            company_name = graph_click["points"][0]["text"].split("Node: ")[1].split("<br>")[0]
+            horizontal_bar._prepare_plot_df(company_name, None)
+            stream_graph._prepare_plot_df(company_name, None)
             return (
                 html.Div(
                     "Click on the heatmap to load wordcloud",
                     style={**placeholder_style, "height": "300px", "marginBottom": "20px"},
                 ),
-                no_update,
-                no_update,
+                horizontal_bar.generate_figure(),
+                stream_graph.generate_figure(),
                 html.Div(
                     "Click on the heatmap to load sentiment comparison",
                     style={**placeholder_style, "height": "200px"},

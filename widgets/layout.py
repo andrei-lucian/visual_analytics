@@ -22,8 +22,6 @@ wordcloud = WordCloudWidget([], id="wordcloud")
 stream_graph = StreamGraph(data=data, html_id="stream_graph")
 
 
-loading_cute_spinner = html.Div(className="cute-spinner", children=[html.Div(), html.Div(), html.Div()])
-
 def create_layout():
     return html.Div(
         style={
@@ -63,7 +61,6 @@ def create_layout():
                             ),
                         ],
                     ),
-
                     # Knowledge Graph (40%)
                     html.Div(
                         style={
@@ -86,7 +83,6 @@ def create_layout():
                             ),
                         ],
                     ),
-
                     # Wordcloud + Sentiment (30%)
                     html.Div(
                         style={
@@ -162,7 +158,6 @@ def create_layout():
                     ),
                 ],
             ),
-
             # Bottom row: Stream Graph + Horizontal Bar
             html.Div(
                 style={
