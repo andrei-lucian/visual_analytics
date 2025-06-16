@@ -124,31 +124,31 @@ def create_layout():
                                 ],
                             ),
                             # Sentiment
-                            html.Div(
-                                style={
-                                    "flex": "1",
-                                    "borderRadius": "8px",
-                                    "display": "flex",
-                                    "flexDirection": "column",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
-                                    "color": "#001f3f",
-                                    "fontStyle": "italic",
-                                    "fontSize": "1.1rem",
-                                    "padding": "0",
-                                    "margin": "0",
-                                },
-                                children=[
-                                    dcc.Loading(
-                                        id="loading-sentiment",
-                                        type="circle",
-                                        children=html.Div(
-                                            id="sentiment-container",
-                                            children=[
-                                                html.Div(
-                                                    "Click on the heatmap to load sentiment comparison",
-                                                    style={"marginBottom": "10px"},
-                                                ),
+							html.Div(
+								style={
+									"flex": "1",
+									"borderRadius": "8px",
+									"display": "flex",
+									"flexDirection": "column",
+									"color": "#001f3f",
+									"fontStyle": "italic",
+									"fontSize": "1.1rem",
+									"padding": "0",
+									"margin": "0",
+									"overflow": "hidden",
+								},
+								children=[
+									dcc.Loading(
+										id="loading-sentiment",
+										type="circle",
+										children=html.Div(
+											id="sentiment-container",
+											style={"flex": "1", "width": "100%", "height": "100%"},
+											children=[
+												html.Div(
+													"Click on the heatmap to load sentiment comparison",
+													style={"marginBottom": "10px"},
+												),
                                             ],
                                         ),
                                     ),

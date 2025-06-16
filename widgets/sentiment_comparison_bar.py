@@ -76,12 +76,11 @@ class DivergingSentimentPlot:
 		fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="gray")
 
 		fig.update_layout(
-			height=160, 
 			autosize=True,
 			margin=dict(l=20, r=20, t=40, b=20),
 			paper_bgcolor="#001f3f",  
 			plot_bgcolor="#001f3f",
-			font=dict(color="#cce6ff"),  
+			font=dict(color="#cce6ff"),
 		)
 
 		return fig
