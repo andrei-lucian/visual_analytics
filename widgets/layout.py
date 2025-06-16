@@ -141,8 +141,10 @@ def create_layout():
                                     "color": "#001f3f",
                                     "fontStyle": "italic",
                                     "fontSize": "1.1rem",
-                                    "padding": "0",
+                                    "padding": "10px",
                                     "margin": "0",
+                                    "overflow": "auto",
+                                    "boxSizing": "border-box" ,
                                     "backgroundColor": "#B9D3F6",
                                 },
                                 children=[
