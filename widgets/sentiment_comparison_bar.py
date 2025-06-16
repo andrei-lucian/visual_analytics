@@ -82,7 +82,7 @@ class DivergingSentimentPlot:
             xaxis_range=[-1, 1],
             bargap=0.5,
             plot_bgcolor="white",
-            height=400 + 30 * len(articles),
+            # height=400 + 30 * len(articles),
         )
 
         return fig

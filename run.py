@@ -1,15 +1,26 @@
 from main import app
 import nltk
 
-nltk.download("punkt")
-nltk.download('punkt_tab')
-nltk.download("vader_lexicon")
+
+def safe_nltk_download(resource_name):
+    try:
+        nltk.data.find(resource_name)
+    except LookupError:
+        nltk.download(resource_name.split("/")[-1])
+
+
+# Usage:
+safe_nltk_download("tokenizers/punkt")  # for "punkt"
+safe_nltk_download("tokenizers/punkt_tab")  # for "punkt_tab"
+safe_nltk_download("sentiment/vader_lexicon")  # for "vader_lexicon"
 
 import spacy
+
 try:
     spacy.load("en_core_web_sm")
 except OSError:
     from spacy.cli import download
+
     download("en_core_web_sm")
     spacy.load("en_core_web_sm")
 

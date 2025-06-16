@@ -15,6 +15,7 @@ from nltk.tokenize import sent_tokenize
 from nltk.sentiment import SentimentIntensityAnalyzer
 import torch
 import torch.nn.functional as F
+import random
 
 
 class KeyphraseExtractionPipeline(TokenClassificationPipeline):
@@ -169,43 +170,69 @@ class WordCloudWidget:
             score (float): The sentiment score of the phrase.
 
         Returns:
-            str: CSS color string ("red", "green", "gray", or "purple").
+            str: CSS color hex.
         """
         phrase_lower = phrase.lower()
         if phrase == "Phantom triplet! This company was never actually mentioned in the alleged article.":
-            return "purple"
+            return "#81d4fa"  # light blue
         elif any(keyword in phrase_lower for keyword in self.force_red_keywords) or score < -0.2:
-            return "red"
+            return "#e57373"  # softer red
         elif any(keyword in phrase_lower for keyword in self.force_green_keywords) or score > 0.2:
-            return "green"
+            return "#81c784"  # softer green
         elif any(keyword in phrase_lower for keyword in self.force_grey_keywords):
-            return "gray"
+            return "#b0bec5"  # softer grey
         else:
-            return "gray"
+            return "#b0bec5"  # softer grey fallback
 
     def render_phrase_tags(self, phrases_with_sentiment):
         """
-        Creates a Dash Div element with styled Span elements for each keyphrase and its sentiment color.
-
-        Parameters:
-            phrases_with_sentiment (List[Tuple[str, Tuple[str, float]]]): List of tuples containing phrase
-                and a tuple of sentiment label and score.
-
-        Returns:
-            dash.html.Div: A Dash Div component containing color-coded phrase tags.
+        Create a nicer looking Dash Div with wordcloud-style spans.
+        Font size and color depend on sentiment score.
+        Positions get slight random shifts for organic distribution.
         """
+        # Parameters for font size scaling
+        min_font_size = 12
+        max_font_size = 48
+
+        # Normalize scores to 0-1 magnitude for sizing
+        scores = [abs(score) for _, (_, score) in phrases_with_sentiment]
+        max_score = max(scores) if scores else 1.0
+
+        def font_size(score):
+            # Linear scale score magnitude to font size range
+            norm = abs(score) / max_score if max_score > 0 else 0
+            size = min_font_size + norm * (max_font_size - min_font_size)
+            return f"{int(size)}px"
+
+        def random_shift():
+            # Small random pixel shift for position jitter
+            return f"translate({random.randint(-10, 10)}px, {random.randint(-10, 10)}px)"
+
+        min_font = 14
+        max_font = 32
+
+        scores = [abs(score) for _, (_, score) in phrases_with_sentiment]
+        max_score = max(scores) if scores else 1.0
+
+        def font_size(score):
+            norm = abs(score) / max_score if max_score > 0 else 0
+            size = min_font + norm * (max_font - min_font)
+            return f"{int(size)}px"
+
         return html.Div(
             id=self.id or "phrase-tags",
             style={
                 "height": "300px",
                 "overflowY": "auto",
                 "padding": "10px",
-                "backgroundColor": "#1a1f2b",
+                "backgroundColor": "#001f3f",  # updated background color here
                 "borderRadius": "12px",
                 "marginBottom": "20px",
                 "display": "flex",
                 "flexWrap": "wrap",
                 "alignContent": "flex-start",
+                "gap": "12px",
+                "justifyContent": "center",
             },
             children=[
                 html.Span(
@@ -213,15 +240,23 @@ class WordCloudWidget:
                     style={
                         "backgroundColor": self.sentiment_color(phrase, score),
                         "color": "white",
-                        "padding": "6px 10px",
+                        "padding": "4px 8px",  # smaller padding to make boxes smaller
                         "borderRadius": "12px",
                         "fontWeight": "bold",
-                        "fontSize": "16px",
+                        "fontSize": "14px",  # slightly smaller text
                         "whiteSpace": "normal",
                         "overflow": "visible",
                         "textOverflow": "unset",
+                        "display": "flex",
+                        "alignItems": "center",
+                        "justifyContent": "center",
+                        "textAlign": "center",  # center text horizontally
+                        "minWidth": "60px",  # minimum width to keep boxes uniform
+                        "maxWidth": "150px",  # max width to prevent overly large boxes
+                        "wordBreak": "break-word",  # wrap long words
                     },
                     title=f"Sentiment: {score:+.2f}",
+                    key=phrase,
                 )
                 for phrase, (label, score) in sorted(phrases_with_sentiment, key=lambda x: -abs(x[1][1]))
             ],

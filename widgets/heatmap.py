@@ -193,7 +193,7 @@ class Heatmap:
             )
         )
 
-        fig.update_xaxes(side="top", showgrid=True, gridcolor="lightgray", tickangle=-45)
+        fig.update_xaxes(side="top", showgrid=True, gridcolor="lightgray", tickangle=0)
         fig.update_yaxes(showgrid=True, gridcolor="lightgray")
 
         return fig
