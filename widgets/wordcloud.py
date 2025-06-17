@@ -300,7 +300,6 @@ class WordCloudWidget:
         Returns:
             List[str]: List of noun chunk strings.
         """
-        sia = SentimentIntensityAnalyzer()
         sentences = self.custom_sentence_split(text)
         entity_sentences = [s for s in sentences if entity.lower() in s.lower()]
 

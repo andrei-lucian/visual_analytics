@@ -101,13 +101,13 @@ def register_callbacks(app):
 			point = heatmap_click["points"][0]
 			month = point["x"]
 			source = point["y"]
-
+			source, month = heatmap.map_abbr_to_full(source, month) # Pass abbreviation to full source and month
 			# Get company name from last clicked node on graph
 			if graph_click is not None:
 				company_name = graph_click["points"][0]["text"].split("Node: ")[1].split("<br>")[0]
 			else:
 				company_name = "Namorna Transit Ltd"  # fallback
-
+				
 			articles = heatmap.get_articles(month, source)
 
 			wordcloud_component = wordcloud.generate_wordcloud(articles, company_name)

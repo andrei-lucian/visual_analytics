@@ -82,7 +82,7 @@ class DivergingSentimentPlot:
                 orientation="h",
                 marker_color=colors,
                 text=text_labels,
-                textposition="outside",
+                textposition="inside",
             )
         )
 
