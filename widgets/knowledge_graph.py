@@ -244,7 +244,7 @@ class KnowledgeGraphPlot:
         Get edge types formatted for use as options in UI controls (e.g., dropdowns).
 
         Returns:
-                list of dict: Each dict contains 'label' and 'value' keys for an edge type.
+            list of dict: Each dict contains 'label' and 'value' keys for an edge type.
         """
         return [{"label": etype, "value": etype} for etype in self.edge_types_available]
 
@@ -255,7 +255,7 @@ class KnowledgeGraphPlot:
         Initially shows all edge types.
 
         Returns:
-                dash.dcc.Graph: Dash Graph component with the generated figure.
+            dash.dcc.Graph: Dash Graph component with the generated figure.
         """
         fig = self.generate_figure(self.edge_types_available)
         return dcc.Graph(id=self.html_id, figure=fig)

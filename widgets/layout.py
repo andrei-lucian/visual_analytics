@@ -103,7 +103,28 @@ def create_layout():
                             # Wordcloud
                             wordcloud.render_placeholder(),
                             # Sentiment
-                            sentiment_bar.render_placeholder(),
+                            html.Div(
+                                sentiment_bar.render_placeholder(),
+								style={
+									"flex": "1",
+									"borderRadius": "8px",
+									"color": "#001f3f",
+									"fontStyle": "italic",
+									"fontSize": "1.1rem",
+									"margin": "0",
+									"backgroundColor": "#B9D3F6",
+									"display": "flex",
+									"flexWrap": "wrap",
+                                    "flexDirection": "column", 
+									"justifyContent": "stretch",
+									"alignItems": "stretch",
+									"gap": "6px",
+									"padding": "12px 16px",
+									"overflow": "auto",
+									"width": "100%",   
+									"height": "400px",     
+								},
+							)
                         ],
                     ),
                 ],

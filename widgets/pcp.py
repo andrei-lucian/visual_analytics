@@ -82,11 +82,11 @@ class PCP:
         by annotators.
 
         Parameters:
-                        selected_point (str, optional): The node (source or target) to filter links by.
-                                                                                                                                                        Defaults to "Namorna Transit Ltd".
-                        heatmap_filter (Tuple[datetime-like, str], optional): Tuple containing a date filter
-                                                                                                                                                        (year-month) and raw source string to further filter links.
-                                                                                                                                                        Defaults to None.
+            selected_point (str, optional): The node (source or target) to filter links by.
+            Defaults to "Namorna Transit Ltd".
+            heatmap_filter (Tuple[datetime-like, str], optional): Tuple containing a date filter
+            (year-month) and raw source string to further filter links.
+            Defaults to None.
         """
         if selected_point is not None:
             filtered_df = self.df_links[
@@ -134,7 +134,7 @@ class PCP:
         category (positive, neutral, negative) associated with each edge type.
 
         Parameters:
-                        fig (plotly.graph_objs.Figure): The Plotly figure to add sentiment bands to.
+            fig (plotly.graph_objs.Figure): The Plotly figure to add sentiment bands to.
         """
         total_counts = (
             self.df_plot.groupby("edge_type")["count"].sum().reindex(self.edge_types_available).fillna(0).cumsum()
@@ -171,7 +171,7 @@ class PCP:
         with traces for each annotator and colored sentiment bands.
 
         Returns:
-                        plotly.graph_objs.Figure: The generated  PCP figure.
+            plotly.graph_objs.Figure: The generated  PCP figure.
         """
         df_melted = self.df_plot
         df_melted = df_melted.rename(columns={"_last_edited_by": "Annotator"})
@@ -218,6 +218,6 @@ class PCP:
         Returns the Dash Graph component rendering the prepared figure.
 
         Returns:
-                        dash.dcc.Graph: Dash Graph component for the  PCP visualization.
+            dash.dcc.Graph: Dash Graph component for the  PCP visualization.
         """
         return dcc.Graph(id=self.html_id, figure=self.fig)

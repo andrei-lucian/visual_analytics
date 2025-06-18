@@ -15,7 +15,7 @@ class DivergingSentimentPlot:
     on sentences mentioning the entity within each article.
 
     Attributes:
-                                                                                                                                    html_id (str): The HTML id used to render the Dash Graph component.
+        html_id (str): The HTML id used to render the Dash Graph component.
     """
 
     def __init__(self, html_id):
@@ -23,30 +23,12 @@ class DivergingSentimentPlot:
         Initializes the DivergingSentimentPlot instance.
 
         Parameters:
-                                                                                                                                        html_id (str): The HTML element ID for the Dash Graph component.
+            html_id (str): The HTML element ID for the Dash Graph component.
         """
         self.html_id = html_id
 
     def render_placeholder(self):
-        return html.Div(
-            style={
-                "flex": "1",  # allows it to take equal space in a flex column
-                "borderRadius": "8px",
-                "color": "#001f3f",
-                "fontStyle": "italic",
-                "fontSize": "1.1rem",
-                "margin": "0",
-                "backgroundColor": "#B9D3F6",
-                "display": "flex",
-                "flexWrap": "wrap",
-                "justifyContent": "center",
-                "alignItems": "center",
-                "gap": "6px",
-                "padding": "12px 16px",
-                "overflow": "hidden",
-            },
-            children=[
-                dcc.Loading(
+        return dcc.Loading(
                     id="loading-sentiment",
                     type="circle",
                     children=html.Div(
@@ -59,41 +41,23 @@ class DivergingSentimentPlot:
                             ),
                         ],
                     ),
-                ),
-            ],
-        )
+                )
+
 
     def render(self, triplet_sentiment_score, articles, entity, month, source):
         """
         Renders the diverging bar chart wrapped in a styled Div.
 
         Returns:
-                                                                                                                                        dash.html.Div: A styled Div containing the Dash Graph.
+            dash.html.Div: A styled Div containing the Dash Graph.
         """
         fig = self.build_figure(triplet_sentiment_score, articles, entity, month, source)
-        return html.Div(
-            dcc.Graph(
+        return dcc.Graph(
                 id=self.html_id,
                 figure=fig,
-                config={"responsive": True},  # Optional: enable responsiveness
-            ),
-            style={
-                "flex": "1",  # allows it to take equal space in a flex column
-                "borderRadius": "8px",
-                "color": "#001f3f",
-                "fontStyle": "italic",
-                "fontSize": "1.1rem",
-                "margin": "0",
-                "backgroundColor": "#B9D3F6",
-                "display": "flex",
-                "flexWrap": "wrap",
-                "justifyContent": "center",
-                "alignItems": "center",
-                "gap": "6px",
-                "padding": "12px 16px",
-                "overflow": "hidden",
-            },
-        )
+                config={"responsive": True},
+                style={"width": "100%", "height": "100%"},
+            )
 
     def build_figure(self, triplet_sentiment_score, articles, entity, month, source):
         """
@@ -101,12 +65,12 @@ class DivergingSentimentPlot:
         showing sentiment scores for the extracted triplet and each article.
 
         Parameters:
-                                                                                                                                        triplet_sentiment_score (float): The sentiment score of the extracted triplet.
-                                                                                                                                        articles (List[str]): List of article filenames to analyze.
-                                                                                                                                        entity (str): The entity/aspect to analyze sentiment for.
+        	triplet_sentiment_score (float): The sentiment score of the extracted triplet.
+        	articles (List[str]): List of article filenames to analyze.
+            entity (str): The entity/aspect to analyze sentiment for.
 
         Returns:
-                                                                                                                                        plotly.graph_objects.Figure: The generated diverging bar chart figure.
+            plotly.graph_objects.Figure: The generated diverging bar chart figure.
         """
         sentiment_scores = self.classify_aspect_sentiment(articles, entity)
         sentiment_scores.insert(0, triplet_sentiment_score)
@@ -121,13 +85,13 @@ class DivergingSentimentPlot:
         fig = go.Figure(
             go.Bar(
                 x=sentiment_scores,
-                y=y_labels,  # These are your tick labels on y-axis
+                y=y_labels, 
                 orientation="h",
                 marker_color=colors,
                 text=text_labels,
-                textposition="inside",
-                hovertext=articles,  # Show full article names on hover
-                hoverinfo="text+x",  # Show hovertext and x value (sentiment score)
+                textposition="auto",
+                hovertext=articles,  
+                hoverinfo="text+x",  
             )
         )
 
@@ -135,14 +99,13 @@ class DivergingSentimentPlot:
 
         fig.update_layout(
             title=dict(
-                text=f"{source} ({month}) <br> vs CatchNet sentiment", x=0.5, xanchor="center"  # center the title
+                text=f"{source} ({month}) <br> vs CatchNet sentiment", x=0.5, xanchor="center"  
             ),
             xaxis_title="Sentiment Score",
             yaxis_title="Article",
             xaxis_range=[-1, 1],
             bargap=0.5,
-            font=dict(color="#083B6E", size=9),  # smaller general font size
-            margin=dict(l=100, r=100, t=100, b=200),  # tighter margins
+            font=dict(color="#083B6E", size=9),
         )
         return fig
 
@@ -152,12 +115,12 @@ class DivergingSentimentPlot:
         in each article using a pretrained transformer model.
 
         Parameters:
-                                                                                                                                        articles (List[str]): List of article filenames (without extension) to analyze.
-                                                                                                                                        entity (str): The entity/aspect to analyze sentiment for.
+            articles (List[str]): List of article filenames (without extension) to analyze.
+            entity (str): The entity/aspect to analyze sentiment for.
 
         Returns:
-                                                                                                                                        List[float]: List of sentiment scores for each article, in the same order as the input articles.
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         Scores range from -1 (negative) to +1 (positive).
+            List[float]: List of sentiment scores for each article, in the same order as the input articles.
+            Scores range from -1 (negative) to +1 (positive).
         """
         sentiments = []
         for art in articles:
@@ -194,10 +157,10 @@ class DivergingSentimentPlot:
         then by sentence boundaries using NLTK's sent_tokenize.
 
         Parameters:
-                                                                                                                                        text (str): The text to split into sentences.
+            text (str): The text to split into sentences.
 
         Returns:
-                                                                                                                                        List[str]: List of sentences extracted from the input text.
+            List[str]: List of sentences extracted from the input text.
         """
         blocks = text.split("\n\n")
         sentences = []
