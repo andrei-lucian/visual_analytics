@@ -30,7 +30,7 @@ def create_layout():
             # "height": "100vh",
             "display": "flex",
             "flexDirection": "column",
-            "padding": "20px 40px",
+            "padding": "20px",
             "gap": "15px",
         },
         children=[
@@ -101,18 +101,23 @@ def create_layout():
                             # Wordcloud
                             html.Div(
                                 style={
-                                    "flex": "1",
+                                    "width": "390px",
+                                    "height": "220px",
                                     "borderRadius": "8px",
-                                    "display": "flex",
-                                    "flexDirection": "column",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
                                     "color": "#001f3f",
                                     "fontStyle": "italic",
                                     "fontSize": "1.1rem",
-                                    "padding": "0",
                                     "margin": "0",
                                     "backgroundColor": "#B9D3F6",
+                                    "flexShrink": 0,
+                                    "flexGrow": 0,
+                                    "display": "flex",
+                                    "flexWrap": "wrap",
+                                    "justifyContent": "center",
+                                    "alignItems": "center",
+                                    "gap": "6px",
+                                    "padding": "12px 16px",
+                                    "overflow": "hidden",  # avoid overflow
                                 },
                                 children=[
                                     dcc.Loading(
@@ -122,7 +127,7 @@ def create_layout():
                                             id="wordcloud-container",
                                             children=[
                                                 html.Div(
-                                                    "Click on the heatmap to load wordcloud",
+                                                    "Click on the heatmap to load",
                                                     style={"marginBottom": "10px"},
                                                 ),
                                             ],
@@ -133,20 +138,23 @@ def create_layout():
                             # Sentiment
                             html.Div(
                                 style={
-                                    "flex": "1",
+                                    "width": "390px",
+                                    "height": "220px",
                                     "borderRadius": "8px",
-                                    "display": "flex",
-                                    "flexDirection": "column",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
                                     "color": "#001f3f",
                                     "fontStyle": "italic",
                                     "fontSize": "1.1rem",
-                                    "padding": "10px",
                                     "margin": "0",
-                                    "overflow": "auto",
-                                    "boxSizing": "border-box",
                                     "backgroundColor": "#B9D3F6",
+                                    "flexShrink": 0,
+                                    "flexGrow": 0,
+                                    "display": "flex",
+                                    "flexWrap": "wrap",
+                                    "justifyContent": "center",
+                                    "alignItems": "center",
+                                    "gap": "6px",
+                                    "padding": "12px 16px",
+                                    "overflow": "hidden",  # avoid overflow
                                 },
                                 children=[
                                     dcc.Loading(
@@ -157,7 +165,7 @@ def create_layout():
                                             style={"flex": "1", "width": "100%", "height": "100%"},
                                             children=[
                                                 html.Div(
-                                                    "Click on the heatmap to load sentiment comparison",
+                                                    "Click on the heatmap to load",
                                                     style={"marginBottom": "10px"},
                                                 ),
                                             ],

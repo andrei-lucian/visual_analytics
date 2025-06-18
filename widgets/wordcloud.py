@@ -97,7 +97,7 @@ class WordCloudWidget:
         self.force_grey_keywords = {"stichtingmarine"}
         self.nlp = spacy.load("en_core_web_sm")
 
-    def generate_wordcloud(self, articles, entity):
+    def generate_wordcloud(self, articles, entity, month, source):
         """
         Extracts keyphrases from articles related to an entity, classifies their sentiment,
         and returns a Dash HTML Div with color-coded phrases.
@@ -118,7 +118,9 @@ class WordCloudWidget:
                 phrases_list.extend(phrases)
 
         if not phrases_list:
-            phrases_list = ["Phantom triplet! This company was never actually mentioned in the alleged article."]
+            phrases_list = [
+                "This company was never actually mentioned in the source article cited by the knowledge graph."
+            ]
 
         # Compute sentiment for each unique phrase
         unique_phrases = list(set(phrases_list))
@@ -132,7 +134,26 @@ class WordCloudWidget:
         if not phrases_with_sentiment:
             phrases_with_sentiment = [("All phrases were neutral", ("neutral", 0.0))]
 
-        return self.render_phrase_tags(phrases_with_sentiment)
+        wordcloud_div = self.render_phrase_tags(phrases_with_sentiment)
+
+        return html.Div(
+            [
+                html.H3(
+                    f"Key phrases about {entity} ({month}) in {source}",
+                    style={
+                        "color": "#083B6E",
+                        "fontSize": "1.1rem",
+                        "fontWeight": "normal",
+                        "fontStyle": "normal",
+                        "marginBottom": "8px",
+                        "width": "100%",
+                        "textAlign": "center",
+                        "fontFamily": "Arial, sans-serif",
+                    },
+                ),
+                wordcloud_div,
+            ]
+        )
 
     def classify_sentiment(self, text, entity):
         """
@@ -173,7 +194,7 @@ class WordCloudWidget:
             str: CSS color hex.
         """
         phrase_lower = phrase.lower()
-        if phrase == "Phantom triplet! This company was never actually mentioned in the alleged article.":
+        if phrase == "This company was never actually mentioned in the source article cited by the knowledge graph.":
             return "#81d4fa"  # light blue
         elif any(keyword in phrase_lower for keyword in self.force_red_keywords) or score < -0.2:
             return "#e57373"  # softer red
@@ -222,6 +243,8 @@ class WordCloudWidget:
         return html.Div(
             id=self.id or "phrase-tags",
             style={
+                "width": "390px",
+                "maxHeight": "190px",  # set a maximum height
                 "borderRadius": "8px",
                 "color": "#001f3f",
                 "fontStyle": "italic",
@@ -233,10 +256,11 @@ class WordCloudWidget:
                 "flexGrow": 0,
                 "display": "flex",
                 "flexWrap": "wrap",
-                "justifyContent": "flex-start",
+                "justifyContent": "center",
                 "alignItems": "flex-start",
                 "gap": "6px",
-                "padding": "10px",
+                "textOverflow": "ellipsis",
+                "overflowY": "auto",
             },
             children=[
                 html.Span(
@@ -250,7 +274,7 @@ class WordCloudWidget:
                         "fontSize": "14px",  # slightly smaller text
                         "whiteSpace": "normal",
                         "overflow": "visible",
-                        "textOverflow": "unset",
+                        "textOverflow": "ellipsis",
                         "display": "flex",
                         "alignItems": "center",
                         "justifyContent": "center",
@@ -262,7 +286,7 @@ class WordCloudWidget:
                     title=f"Sentiment: {score:+.2f}",
                     key=phrase,
                 )
-                for phrase, (label, score) in sorted(phrases_with_sentiment, key=lambda x: -abs(x[1][1]))
+                for phrase, (label, score) in sorted(phrases_with_sentiment[:30], key=lambda x: -abs(x[1][1]))
             ],
         )
 

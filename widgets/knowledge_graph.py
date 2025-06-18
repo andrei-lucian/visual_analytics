@@ -163,7 +163,7 @@ class KnowledgeGraphPlot:
         # Initialize figure with edges and community-colored nodes
         fig = go.Figure(data=edge_traces + [node_trace])
         fig.update_layout(
-            title="Knowledge Graph (Filtered by Edge Type)",
+            title="CatchNet (Filtered by Edge Type)",
             title_font_size=16,
             showlegend=False,
             legend=dict(
@@ -218,7 +218,7 @@ class KnowledgeGraphPlot:
         fig = go.Figure(data=edge_traces + node_traces)
 
         fig.update_layout(
-            title="Knowledge Graph (Filtered by Edge Type)",
+            title="CatchNet (Filtered by Edge Type)",
             title_font_size=16,
             showlegend=True,
             legend=dict(
