@@ -1,7 +1,6 @@
 from typing import List
-from dash import html
+from dash import html, dcc
 import spacy
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from transformers import (
     TokenClassificationPipeline,
     AutoModelForTokenClassification,
@@ -12,7 +11,6 @@ from transformers.pipelines import AggregationStrategy
 import numpy as np
 from transformers import AutoTokenizer
 from nltk.tokenize import sent_tokenize
-from nltk.sentiment import SentimentIntensityAnalyzer
 import torch
 import torch.nn.functional as F
 import random
@@ -97,7 +95,42 @@ class WordCloudWidget:
         self.force_grey_keywords = {"stichtingmarine"}
         self.nlp = spacy.load("en_core_web_sm")
 
-    def generate_wordcloud(self, articles, entity, month, source):
+    def render_placeholder(self):
+        return html.Div(
+            style={
+                "flex": "1",  # allows it to take equal space in a flex column
+                "borderRadius": "8px",
+                "color": "#001f3f",
+                "fontStyle": "italic",
+                "fontSize": "1.1rem",
+                "margin": "0",
+                "backgroundColor": "#B9D3F6",
+                "display": "flex",
+                "flexWrap": "wrap",
+                "justifyContent": "center",
+                "alignItems": "center",
+                "gap": "6px",
+                "padding": "12px 16px",
+                "overflow": "auto",
+            },
+            children=[
+                dcc.Loading(
+                    id="loading-wordcloud",
+                    type="circle",
+                    children=html.Div(
+                        id="wordcloud-container",
+                        children=[
+                            html.Div(
+                                "Click on the heatmap to load",
+                                style={"marginBottom": "10px"},
+                            ),
+                        ],
+                    ),
+                ),
+            ],
+        )
+
+    def render_wordcloud(self, articles, entity, month, source):
         """
         Extracts keyphrases from articles related to an entity, classifies their sentiment,
         and returns a Dash HTML Div with color-coded phrases.
@@ -134,7 +167,7 @@ class WordCloudWidget:
         if not phrases_with_sentiment:
             phrases_with_sentiment = [("All phrases were neutral", ("neutral", 0.0))]
 
-        wordcloud_div = self.render_phrase_tags(phrases_with_sentiment)
+        wordcloud_div = self.generate_phrase_tags(phrases_with_sentiment)
 
         return html.Div(
             [
@@ -205,7 +238,7 @@ class WordCloudWidget:
         else:
             return "#b0bec5"  # softer grey fallback
 
-    def render_phrase_tags(self, phrases_with_sentiment):
+    def generate_phrase_tags(self, phrases_with_sentiment):
         """
         Create a nicer looking Dash Div with wordcloud-style spans.
         Font size and color depend on sentiment score.
@@ -243,24 +276,20 @@ class WordCloudWidget:
         return html.Div(
             id=self.id or "phrase-tags",
             style={
-                "width": "390px",
-                "maxHeight": "190px",  # set a maximum height
+                "flex": "1",  # allows it to take equal space in a flex column
                 "borderRadius": "8px",
                 "color": "#001f3f",
                 "fontStyle": "italic",
                 "fontSize": "1.1rem",
-                "padding": "0",
                 "margin": "0",
                 "backgroundColor": "#B9D3F6",
-                "flexShrink": 0,
-                "flexGrow": 0,
                 "display": "flex",
                 "flexWrap": "wrap",
                 "justifyContent": "center",
-                "alignItems": "flex-start",
+                "alignItems": "center",
                 "gap": "6px",
-                "textOverflow": "ellipsis",
-                "overflowY": "auto",
+                "padding": "12px 16px",
+                "overflow": "auto",
             },
             children=[
                 html.Span(
@@ -268,20 +297,21 @@ class WordCloudWidget:
                     style={
                         "backgroundColor": self.sentiment_color(phrase, score),
                         "color": "white",
-                        "padding": "4px 8px",  # smaller padding to make boxes smaller
+                        "padding": "4px 8px",
                         "borderRadius": "12px",
                         "fontWeight": "bold",
-                        "fontSize": "14px",  # slightly smaller text
-                        "whiteSpace": "normal",
-                        "overflow": "visible",
-                        "textOverflow": "ellipsis",
-                        "display": "flex",
+                        "fontSize": "14px",
+                        "whiteSpace": "normal",  # allow wrapping
+                        "overflow": "hidden",  # hide overflowed content
+                        "textOverflow": "ellipsis",  # show ... if text is cut off
+                        "display": "inline-flex",  # tighter layout than block flex
                         "alignItems": "center",
                         "justifyContent": "center",
-                        "textAlign": "center",  # center text horizontally
-                        "minWidth": "60px",  # minimum width to keep boxes uniform
-                        "maxWidth": "150px",  # max width to prevent overly large boxes
-                        "wordBreak": "break-word",  # wrap long words
+                        "textAlign": "center",
+                        # "minWidth": "60px",
+                        # "maxWidth": "150px",
+                        "wordBreak": "break-word",  # break long words
+                        "flexShrink": "1",  # allow shrinking
                     },
                     title=f"Sentiment: {score:+.2f}",
                     key=phrase,

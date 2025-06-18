@@ -67,39 +67,14 @@ def register_callbacks(app):
         triggered = callback_context.triggered[0]["prop_id"].split(".")[0]
 
         if triggered == "graph":
-            placeholder_style = {
-                "width": "390px",
-                "height": "220px",
-                "borderRadius": "8px",
-                "color": "#001f3f",
-                "fontStyle": "italic",
-                "fontSize": "1.1rem",
-                "margin": "0",
-                "backgroundColor": "#B9D3F6",
-                "flexShrink": 0,
-                "flexGrow": 0,
-                "display": "flex",
-                "flexWrap": "wrap",
-                "justifyContent": "center",
-                "alignItems": "center",
-                "gap": "6px",
-                "padding": "12px 16px",
-                "overflow": "hidden",  # avoid overflow
-            }
             company_name = graph_click["points"][0]["text"].split("Node: ")[1].split("<br>")[0]
             horizontal_bar._prepare_plot_df(company_name, None)
             stream_graph._prepare_plot_df(company_name, None)
             return (
-                html.Div(
-                    "Click on the heatmap to load",
-                    style={**placeholder_style, "height": "300px", "marginBottom": "20px"},
-                ),
+                wordcloud.render_placeholder(),
                 horizontal_bar.generate_figure(),
                 stream_graph.generate_figure(),
-                html.Div(
-                    "Click on the heatmap to load",
-                    style={**placeholder_style, "height": "200px"},
-                ),
+                sentiment_bar.render_placeholder(),
             )
 
         if triggered == "heatmap" and heatmap_click is not None:
@@ -114,23 +89,14 @@ def register_callbacks(app):
                 company_name = "Namorna Transit Ltd"  # fallback
 
             articles = heatmap.get_articles(month, source)
-
-            wordcloud_component = wordcloud.generate_wordcloud(articles, company_name, month, source)
             horizontal_bar._prepare_plot_df(company_name, heatmap_filter=(month, source))
             stream_graph._prepare_plot_df(company_name, heatmap_filter=(month, source))
 
-            sentiment_bar = DivergingSentimentPlot(html_id="sentiment-container")
-            sentiment_figure = dcc.Graph(
-                figure=sentiment_bar.build_figure(
-                    heatmap.get_sentiment_score(heatmap_click), articles, company_name, month, source
-                )
-            )
-
             return (
-                wordcloud_component,
+                wordcloud.render_wordcloud(articles, company_name, month, source),
                 horizontal_bar.generate_figure(month, source),
                 stream_graph.generate_figure(month, source),
-                sentiment_figure,
+                sentiment_bar.render(heatmap.get_sentiment_score(heatmap_click), articles, company_name, month, source),
             )
 
         return no_update, no_update, no_update, no_update

@@ -3,9 +3,9 @@ from dash import dcc
 import pandas as pd
 
 
-class StreamGraph:
+class PCP:
     """
-    A class to create a stream graph visualization of edge types categorized by sentiment
+    A class to create a  PCP visualization of edge types categorized by sentiment
     and annotated by different users, based on graph data containing nodes and links.
 
     Attributes:
@@ -16,12 +16,12 @@ class StreamGraph:
                     df_links (pd.DataFrame): DataFrame constructed from links data.
                     edge_types_available (List[str]): Sorted list of edge types ordered by sentiment.
                     df_plot (pd.DataFrame): DataFrame used for plotting after processing.
-                    fig (plotly.graph_objs.Figure): Plotly figure object for the stream graph.
+                    fig (plotly.graph_objs.Figure): Plotly figure object for the  PCP.
     """
 
     def __init__(self, data, html_id):
         """
-        Initializes the StreamGraph instance by preparing dataframes, edge types,
+        Initializes the PCP instance by preparing dataframes, edge types,
         processed plotting data, and the initial figure.
 
         Parameters:
@@ -167,18 +167,18 @@ class StreamGraph:
 
     def generate_figure(self, month="", source=""):
         """
-        Generates the Plotly area chart figure representing the stream graph,
+        Generates the Plotly area chart figure representing the  PCP,
         with traces for each annotator and colored sentiment bands.
 
         Returns:
-                        plotly.graph_objs.Figure: The generated stream graph figure.
+                        plotly.graph_objs.Figure: The generated  PCP figure.
         """
         df_melted = self.df_plot
         df_melted = df_melted.rename(columns={"_last_edited_by": "Annotator"})
         if month == "":
-            title = "Edge Type Stream Graph by Annotator"
+            title = "Edge Type  PCP by Annotator"
         else:
-            title = f"Edge Type Stream Graph by Annotator <br> (source: {source} ({month}))"
+            title = f"Edge Type PCP by Annotator <br> (source: {source} ({month}))"
         fig = px.area(
             df_melted,
             x="edge_type",
@@ -218,6 +218,6 @@ class StreamGraph:
         Returns the Dash Graph component rendering the prepared figure.
 
         Returns:
-                        dash.dcc.Graph: Dash Graph component for the stream graph visualization.
+                        dash.dcc.Graph: Dash Graph component for the  PCP visualization.
         """
         return dcc.Graph(id=self.html_id, figure=self.fig)

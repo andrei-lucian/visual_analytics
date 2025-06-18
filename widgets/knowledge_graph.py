@@ -2,6 +2,7 @@ import networkx as nx
 import community.community_louvain as community_louvain
 import plotly.graph_objects as go
 from dash import dcc
+from itertools import cycle
 
 
 class KnowledgeGraphPlot:
@@ -45,7 +46,6 @@ class KnowledgeGraphPlot:
         Returns:
                 dict: Edge type as keys and color strings as values.
         """
-        from itertools import cycle
 
         colors = cycle(["red", "green", "blue", "orange", "purple", "brown", "cyan", "magenta", "gray"])
         return {etype: next(colors) for etype in self.edge_types_available}

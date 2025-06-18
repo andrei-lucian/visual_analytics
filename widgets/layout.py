@@ -6,7 +6,7 @@ from widgets.horizontal_bar import *
 from widgets.heatmap import *
 from widgets.dropdown import *
 from widgets.wordcloud import *
-from widgets.stream_graph import *
+from widgets.pcp import *
 from widgets.sentiment_comparison_bar import *
 
 with open("data/mc1.json", "r") as f:
@@ -19,7 +19,8 @@ horizontal_bar = HorizontalBarPlot(data=data, html_id="horizontalbar")
 edge_type_dropdown = EdgeTypeDropdown(knowledge_graph._get_edge_types(), html_id="dropdown")
 heatmap = Heatmap(data=data, html_id="heatmap")
 wordcloud = WordCloudWidget([], id="wordcloud")
-stream_graph = StreamGraph(data=data, html_id="stream_graph")
+sentiment_bar = DivergingSentimentPlot("sentiment-bar")
+stream_graph = PCP(data=data, html_id="stream_graph")
 
 
 def create_layout():
@@ -27,7 +28,6 @@ def create_layout():
         style={
             "maxwidth": "100%",
             "maxheight": "100%",
-            # "height": "100vh",
             "display": "flex",
             "flexDirection": "column",
             "padding": "20px",
@@ -37,7 +37,8 @@ def create_layout():
             # Top row: Heatmap, Knowledge Graph, Wordcloud+Sentiment
             html.Div(
                 style={
-                    "height": "50%",
+                    "height": "60vh",
+                    "overflow": "hidden",
                     "display": "flex",
                     "flexDirection": "row",
                     "gap": "15px",
@@ -50,7 +51,7 @@ def create_layout():
                             "display": "flex",
                             "flexDirection": "column",
                             "backgroundColor": "#B9D3F6",
-                            "borderRadius": "12px",  # <-- rounded corners here
+                            "borderRadius": "12px",
                         },
                         children=[
                             html.Div(
@@ -73,7 +74,7 @@ def create_layout():
                             "flexDirection": "column",
                             "gap": "10px",
                             "backgroundColor": "#B9D3F6",
-                            "borderRadius": "12px",  # <-- rounded corners here
+                            "borderRadius": "12px",
                         },
                         children=[
                             html.Div(edge_type_dropdown.render(), style={"height": "40px"}),
@@ -81,7 +82,7 @@ def create_layout():
                                 knowledge_graph.render(),
                                 style={
                                     "flex": "1",
-                                    "borderRadius": "12px",  # <-- rounded corners here
+                                    "borderRadius": "12px",
                                     "backgroundColor": "#B9D3F6",
                                     "padding": "0",
                                     "margin": "0",
@@ -96,83 +97,13 @@ def create_layout():
                             "display": "flex",
                             "flexDirection": "column",
                             "gap": "10px",
+                            "flex": "1",
                         },
                         children=[
                             # Wordcloud
-                            html.Div(
-                                style={
-                                    "width": "390px",
-                                    "height": "220px",
-                                    "borderRadius": "8px",
-                                    "color": "#001f3f",
-                                    "fontStyle": "italic",
-                                    "fontSize": "1.1rem",
-                                    "margin": "0",
-                                    "backgroundColor": "#B9D3F6",
-                                    "flexShrink": 0,
-                                    "flexGrow": 0,
-                                    "display": "flex",
-                                    "flexWrap": "wrap",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
-                                    "gap": "6px",
-                                    "padding": "12px 16px",
-                                    "overflow": "hidden",  # avoid overflow
-                                },
-                                children=[
-                                    dcc.Loading(
-                                        id="loading-wordcloud",
-                                        type="circle",
-                                        children=html.Div(
-                                            id="wordcloud-container",
-                                            children=[
-                                                html.Div(
-                                                    "Click on the heatmap to load",
-                                                    style={"marginBottom": "10px"},
-                                                ),
-                                            ],
-                                        ),
-                                    ),
-                                ],
-                            ),
+                            wordcloud.render_placeholder(),
                             # Sentiment
-                            html.Div(
-                                style={
-                                    "width": "390px",
-                                    "height": "220px",
-                                    "borderRadius": "8px",
-                                    "color": "#001f3f",
-                                    "fontStyle": "italic",
-                                    "fontSize": "1.1rem",
-                                    "margin": "0",
-                                    "backgroundColor": "#B9D3F6",
-                                    "flexShrink": 0,
-                                    "flexGrow": 0,
-                                    "display": "flex",
-                                    "flexWrap": "wrap",
-                                    "justifyContent": "center",
-                                    "alignItems": "center",
-                                    "gap": "6px",
-                                    "padding": "12px 16px",
-                                    "overflow": "hidden",  # avoid overflow
-                                },
-                                children=[
-                                    dcc.Loading(
-                                        id="loading-sentiment",
-                                        type="circle",
-                                        children=html.Div(
-                                            id="sentiment-container",
-                                            style={"flex": "1", "width": "100%", "height": "100%"},
-                                            children=[
-                                                html.Div(
-                                                    "Click on the heatmap to load",
-                                                    style={"marginBottom": "10px"},
-                                                ),
-                                            ],
-                                        ),
-                                    ),
-                                ],
-                            ),
+                            sentiment_bar.render_placeholder(),
                         ],
                     ),
                 ],
@@ -180,10 +111,11 @@ def create_layout():
             # Bottom row: Stream Graph + Horizontal Bar
             html.Div(
                 style={
-                    "height": "50%",
+                    "height": "40vh",
                     "display": "flex",
                     "flexDirection": "row",
                     "gap": "15px",
+                    "overflow": "hidden",
                 },
                 children=[
                     # Horizontal Bar (50%)
@@ -195,7 +127,7 @@ def create_layout():
                             "padding": "0",
                             "margin": "0",
                             "backgroundColor": "#B9D3F6",
-                            "borderRadius": "12px",  # <-- rounded corners here
+                            "borderRadius": "12px",
                         },
                     ),
                     # Stream Graph (50%)
@@ -207,7 +139,7 @@ def create_layout():
                             "padding": "0",
                             "margin": "0",
                             "backgroundColor": "#B9D3F6",
-                            "borderRadius": "12px",  # <-- rounded corners here
+                            "borderRadius": "12px",
                         },
                     ),
                 ],
