@@ -72,13 +72,6 @@ class WordCloudWidget:
         Initializes the word cloud widget.
 
         Loads models for keyphrase extraction and phrase-level sentiment classification.
-
-        Parameters:
-            phrases (List[str]): List of phrases (not directly used, can be for future).
-            width (int): Width of the word cloud display area.
-            height (int): Height of the word cloud display area.
-            background_color (str): Background color for the widget container.
-            id (str, optional): HTML element ID for the widget.
         """
         self.phrases = phrases
         self.width = width
@@ -96,7 +89,10 @@ class WordCloudWidget:
         self.nlp = spacy.load("en_core_web_sm")
 
     def render_placeholder(self):
-
+        """
+        Create a placeholder for the wordcloud widget.
+        This is what is shown on startup and when no heatmap cell has been selected yet.
+        """
         return html.Div(
             style={
                 "height": "100%",
@@ -121,6 +117,8 @@ class WordCloudWidget:
         Parameters:
             articles (List[str]): List of article filenames (without extension).
             entity (str): The entity name to focus extraction and sentiment on.
+            month (str): The month to filter by from the clicked heatmap cell.
+            source (str): The source to filter by from the clicked heatmap cell.
 
         Returns:
             dash.html.Div: Dash Div component containing color-coded keyphrase tags.
@@ -170,7 +168,7 @@ class WordCloudWidget:
                 wordcloud_div,
             ],
             style={
-                "height": "100%",  # let it fill parent's height
+                "height": "100%",
                 "display": "flex",
                 "flexDirection": "column",
             },
@@ -216,21 +214,20 @@ class WordCloudWidget:
         """
         phrase_lower = phrase.lower()
         if phrase == "This company was never actually mentioned in the source article cited by the knowledge graph.":
-            return "#81d4fa"  # light blue
+            return "#81d4fa"
         elif any(keyword in phrase_lower for keyword in self.force_red_keywords) or score < -0.2:
-            return "#e57373"  # softer red
+            return "#e57373"
         elif any(keyword in phrase_lower for keyword in self.force_green_keywords) or score > 0.2:
-            return "#81c784"  # softer green
+            return "#81c784"
         elif any(keyword in phrase_lower for keyword in self.force_grey_keywords):
-            return "#b0bec5"  # softer grey
+            return "#b0bec5"
         else:
-            return "#b0bec5"  # softer grey fallback
+            return "#b0bec5"
 
     def generate_phrase_tags(self, phrases_with_sentiment):
         """
-        Create a nicer looking Dash Div with wordcloud-style spans.
+        Create a Dash Div with wordcloud-style spans.
         Font size and color depend on sentiment score.
-        Positions get slight random shifts for organic distribution.
         """
         # Parameters for font size scaling
         min_font_size = 12
@@ -239,16 +236,6 @@ class WordCloudWidget:
         # Normalize scores to 0-1 magnitude for sizing
         scores = [abs(score) for _, (_, score) in phrases_with_sentiment]
         max_score = max(scores) if scores else 1.0
-
-        def font_size(score):
-            # Linear scale score magnitude to font size range
-            norm = abs(score) / max_score if max_score > 0 else 0
-            size = min_font_size + norm * (max_font_size - min_font_size)
-            return f"{int(size)}px"
-
-        def random_shift():
-            # Small random pixel shift for position jitter
-            return f"translate({random.randint(-10, 10)}px, {random.randint(-10, 10)}px)"
 
         min_font = 14
         max_font = 32
@@ -264,7 +251,7 @@ class WordCloudWidget:
         return html.Div(
             id=self.id or "phrase-tags",
             style={
-                "flex": "1",  # allows it to take equal space in a flex column
+                "flex": "1",
                 "borderRadius": "8px",
                 "color": "#001f3f",
                 "fontStyle": "italic",
@@ -289,22 +276,20 @@ class WordCloudWidget:
                         "borderRadius": "12px",
                         "fontWeight": "bold",
                         "fontSize": "14px",
-                        "whiteSpace": "normal",  # allow wrapping
-                        "overflow": "hidden",  # hide overflowed content
-                        "textOverflow": "ellipsis",  # show ... if text is cut off
-                        "display": "inline-flex",  # tighter layout than block flex
+                        "whiteSpace": "normal",
+                        "overflow": "hidden",
+                        "textOverflow": "ellipsis",
+                        "display": "inline-flex",
                         "alignItems": "center",
                         "justifyContent": "center",
                         "textAlign": "center",
-                        # "minWidth": "60px",
-                        # "maxWidth": "150px",
-                        "wordBreak": "break-word",  # break long words
-                        "flexShrink": "1",  # allow shrinking
+                        "wordBreak": "break-word",
+                        "flexShrink": "1",
                     },
                     title=f"Sentiment: {score:+.2f}",
                     key=phrase,
                 )
-                for phrase, (label, score) in sorted(phrases_with_sentiment[:30], key=lambda x: -abs(x[1][1]))
+                for phrase, (_, score) in sorted(phrases_with_sentiment[:30], key=lambda x: -abs(x[1][1]))
             ],
         )
 

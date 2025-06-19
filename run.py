@@ -10,9 +10,9 @@ def safe_nltk_download(resource_name):
 
 
 # Usage:
-safe_nltk_download("tokenizers/punkt")  # for "punkt"
-safe_nltk_download("tokenizers/punkt_tab")  # for "punkt_tab"
-safe_nltk_download("sentiment/vader_lexicon")  # for "vader_lexicon"
+safe_nltk_download("tokenizers/punkt")
+safe_nltk_download("tokenizers/punkt_tab")
+safe_nltk_download("sentiment/vader_lexicon")
 
 import spacy
 

@@ -99,7 +99,7 @@ def create_layout():
                             html.Div(
                                 id="wordcloud-container",
                                 style={
-                                    "height": "calc(50% - 5px)",  # Account for half of the 10px gap
+                                    "height": "calc(50% - 5px)",
                                     "backgroundColor": "#B9D3F6",
                                     "borderRadius": "8px",
                                 },
@@ -108,7 +108,7 @@ def create_layout():
                             html.Div(
                                 id="sentiment-container",
                                 style={
-                                    "height": "calc(50% - 5px)",  # Same here
+                                    "height": "calc(50% - 5px)",
                                     "backgroundColor": "#B9D3F6",
                                     "borderRadius": "8px",
                                 },

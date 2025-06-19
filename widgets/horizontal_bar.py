@@ -7,29 +7,7 @@ from dash import dcc
 class HorizontalBarPlot:
     """
     A class to create a horizontal bar chart comparing edge type frequencies between
-    two algorithms: BassLine and ShadGPT.
-
-    Attributes:
-    -----------
-    data : dict
-                    Input graph data containing 'nodes' and 'links'.
-    html_id : str
-                    The ID for the Dash component.
-    edge_type_sentiment : dict
-                    Mapping of edge types to sentiment categories.
-    df_nodes : pd.DataFrame
-                    DataFrame containing node data.
-    df_links : pd.DataFrame
-                    DataFrame containing link (edge) data.
-    edge_types_available : list
-                    Sorted list of all unique edge types based on sentiment order.
-    color_map : dict
-                    Maps algorithm names to color codes.
-    df_plot : pd.DataFrame
-                    Prepared DataFrame for plotting.
-    fig : plotly.graph_objects.Figure
-                    The plotly figure generated.
-    """
+    two algorithms: BassLine and ShadGPT."""
 
     def __init__(self, data, html_id):
         self.html_id = html_id
@@ -169,7 +147,7 @@ class HorizontalBarPlot:
         current_group = None
         start = None
 
-        for i, label in enumerate(x_labels + [None]):  # sentinel for final group
+        for i, label in enumerate(x_labels + [None]):
             sentiment = self.edge_type_sentiment.get(label, "neutral") if label else None
             if sentiment != current_group:
                 if current_group is not None:

@@ -1,4 +1,4 @@
-from dash import dcc, html
+from dash import dcc
 
 
 class EdgeTypeDropdown:
@@ -23,7 +23,7 @@ class EdgeTypeDropdown:
         return dcc.Dropdown(
             id=self.html_id,
             options=self.options,
-            value=[self.options[0], self.options[1]],  # default select all
+            value=[self.options[0], self.options[1]],
             multi=True,
             placeholder="Select edge types",
             clearable=False,

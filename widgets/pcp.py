@@ -7,16 +7,6 @@ class PCP:
     """
     A class to create a  PCP visualization of edge types categorized by sentiment
     and annotated by different users, based on graph data containing nodes and links.
-
-    Attributes:
-                    html_id (str): The HTML element ID for rendering the Dash Graph component.
-                    data (dict): Dictionary containing 'nodes' and 'links' information.
-                    edge_type_sentiment (dict): Mapping from edge types to sentiment categories.
-                    df_nodes (pd.DataFrame): DataFrame constructed from nodes data.
-                    df_links (pd.DataFrame): DataFrame constructed from links data.
-                    edge_types_available (List[str]): Sorted list of edge types ordered by sentiment.
-                    df_plot (pd.DataFrame): DataFrame used for plotting after processing.
-                    fig (plotly.graph_objs.Figure): Plotly figure object for the  PCP.
     """
 
     def __init__(self, data, html_id):
@@ -25,8 +15,8 @@ class PCP:
         processed plotting data, and the initial figure.
 
         Parameters:
-                        data (dict): Dictionary containing 'nodes' and 'links' lists.
-                        html_id (str): The HTML id string for the Dash Graph component.
+            data (dict): Dictionary containing 'nodes' and 'links' lists.
+            html_id (str): The HTML id string for the Dash Graph component.
         """
         self.html_id = html_id
         self.data = data
@@ -57,7 +47,7 @@ class PCP:
         Converts the input data dictionaries into pandas DataFrames for nodes and links.
 
         Returns:
-                        Tuple[pd.DataFrame, pd.DataFrame]: DataFrames for nodes and links respectively.
+            Tuple[pd.DataFrame, pd.DataFrame]: DataFrames for nodes and links respectively.
         """
         nodes = self.data["nodes"]
         links = self.data["links"]
@@ -69,7 +59,7 @@ class PCP:
         negative < neutral < positive.
 
         Returns:
-                        List[str]: Sorted list of edge types based on their sentiment category.
+            List[str]: Sorted list of edge types based on their sentiment category.
         """
         types = self.df_links["type"].unique()
         sentiment_order = {"negative": 0, "neutral": 1, "positive": 2}
