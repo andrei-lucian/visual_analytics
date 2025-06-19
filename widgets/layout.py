@@ -56,13 +56,7 @@ def create_layout():
                         children=[
                             html.Div(
                                 heatmap.render(company_name=initial_point, clickData=None),
-                                style={
-                                    "flex": "1",
-                                    "borderRadius": "8px",
-                                    "padding": "0",
-                                    "margin": "0",
-                                    "backgroundColor": "#B9D3F6",
-                                },
+                                style={"width": "100%", "height": "100%"},
                             ),
                         ],
                     ),
@@ -86,6 +80,7 @@ def create_layout():
                                     "backgroundColor": "#B9D3F6",
                                     "padding": "0",
                                     "margin": "0",
+                                    "overflow": "auto",
                                 },
                             ),
                         ],
@@ -94,37 +89,31 @@ def create_layout():
                     html.Div(
                         style={
                             "width": "30%",
+                            "height": "60vh",
                             "display": "flex",
                             "flexDirection": "column",
                             "gap": "10px",
                             "flex": "1",
                         },
                         children=[
-                            # Wordcloud
-                            wordcloud.render_placeholder(),
-                            # Sentiment
                             html.Div(
-                                sentiment_bar.render_placeholder(),
-								style={
-									"flex": "1",
-									"borderRadius": "8px",
-									"color": "#001f3f",
-									"fontStyle": "italic",
-									"fontSize": "1.1rem",
-									"margin": "0",
-									"backgroundColor": "#B9D3F6",
-									"display": "flex",
-									"flexWrap": "wrap",
-                                    "flexDirection": "column", 
-									"justifyContent": "stretch",
-									"alignItems": "stretch",
-									"gap": "6px",
-									"padding": "12px 16px",
-									"overflow": "auto",
-									"width": "100%",   
-									"height": "400px",     
-								},
-							)
+                                id="wordcloud-container",
+                                style={
+                                    "height": "calc(50% - 5px)",  # Account for half of the 10px gap
+                                    "backgroundColor": "#B9D3F6",
+                                    "borderRadius": "8px",
+                                },
+                                children=wordcloud.render_placeholder(),
+                            ),
+                            html.Div(
+                                id="sentiment-container",
+                                style={
+                                    "height": "calc(50% - 5px)",  # Same here
+                                    "backgroundColor": "#B9D3F6",
+                                    "borderRadius": "8px",
+                                },
+                                children=sentiment_bar.render_placeholder(),
+                            ),
                         ],
                     ),
                 ],
@@ -136,7 +125,6 @@ def create_layout():
                     "display": "flex",
                     "flexDirection": "row",
                     "gap": "15px",
-                    "overflow": "hidden",
                 },
                 children=[
                     # Horizontal Bar (50%)
@@ -149,6 +137,7 @@ def create_layout():
                             "margin": "0",
                             "backgroundColor": "#B9D3F6",
                             "borderRadius": "12px",
+                            "overflow": "auto",
                         },
                     ),
                     # Stream Graph (50%)
@@ -161,6 +150,7 @@ def create_layout():
                             "margin": "0",
                             "backgroundColor": "#B9D3F6",
                             "borderRadius": "12px",
+                            "overflow": "auto",
                         },
                     ),
                 ],

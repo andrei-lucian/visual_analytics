@@ -1,3 +1,5 @@
+NOTE: Docstrings, the .css theme, and this README were generated with ChatGPT and reviewed by us before being included in the code base.
+
 Bias Detection and Sentiment Analysis Dashboard
 
 This application provides an interactive dashboard for comparing sentiment and bias across multiple sources, including large language models (LLMs), human annotators, and news articles. It extracts keyphrases mentioning a target entity, evaluates their sentiment, and visualizes differences in sentiment and focus to help identify potential bias between sources.
@@ -13,13 +15,12 @@ Features
 
     Interactive, web-based visualization using Dash and Plotly.
 
-
 Installation
 
 Create and activate a Python virtual environment (recommended):
 
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate # On Windows: venv\Scripts\activate
 
 Install dependencies:
 

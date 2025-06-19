@@ -28,21 +28,22 @@ class DivergingSentimentPlot:
         self.html_id = html_id
 
     def render_placeholder(self):
-        return dcc.Loading(
-                    id="loading-sentiment",
-                    type="circle",
-                    children=html.Div(
-                        id="sentiment-container",
-                        style={"flex": "1", "width": "100%", "height": "100%"},
-                        children=[
-                            html.Div(
-                                "Click on the heatmap to load",
-                                style={"marginBottom": "10px"},
-                            ),
-                        ],
-                    ),
-                )
 
+        return html.Div(
+            style={
+                "height": "100%",
+                "backgroundColor": "#B9D3F6",
+                "display": "flex",
+                "justifyContent": "center",
+                "alignItems": "center",
+                "borderRadius": "8px",
+            },
+            children=[
+                html.Div(
+                    "Click on heatmap to load", style={"fontSize": "1.1rem", "fontStyle": "italic", "color": "#083B6E"}
+                )
+            ],
+        )
 
     def render(self, triplet_sentiment_score, articles, entity, month, source):
         """
@@ -53,11 +54,11 @@ class DivergingSentimentPlot:
         """
         fig = self.build_figure(triplet_sentiment_score, articles, entity, month, source)
         return dcc.Graph(
-                id=self.html_id,
-                figure=fig,
-                config={"responsive": True},
-                style={"width": "100%", "height": "100%"},
-            )
+            id=self.html_id,
+            figure=fig,
+            config={"responsive": True},
+            style={"width": "100%", "height": "100%"},
+        )
 
     def build_figure(self, triplet_sentiment_score, articles, entity, month, source):
         """
@@ -65,8 +66,8 @@ class DivergingSentimentPlot:
         showing sentiment scores for the extracted triplet and each article.
 
         Parameters:
-        	triplet_sentiment_score (float): The sentiment score of the extracted triplet.
-        	articles (List[str]): List of article filenames to analyze.
+                triplet_sentiment_score (float): The sentiment score of the extracted triplet.
+                articles (List[str]): List of article filenames to analyze.
             entity (str): The entity/aspect to analyze sentiment for.
 
         Returns:
@@ -85,22 +86,20 @@ class DivergingSentimentPlot:
         fig = go.Figure(
             go.Bar(
                 x=sentiment_scores,
-                y=y_labels, 
+                y=y_labels,
                 orientation="h",
                 marker_color=colors,
                 text=text_labels,
                 textposition="auto",
-                hovertext=articles,  
-                hoverinfo="text+x",  
+                hovertext=articles,
+                hoverinfo="text+x",
             )
         )
 
         fig.add_vline(x=0, line_width=1, line_dash="dash", line_color="gray")
 
         fig.update_layout(
-            title=dict(
-                text=f"{source} ({month}) <br> vs CatchNet sentiment", x=0.5, xanchor="center"  
-            ),
+            title=dict(text=f"{source} ({month}) <br> vs CatchNet sentiment", x=0.5, xanchor="center"),
             xaxis_title="Sentiment Score",
             yaxis_title="Article",
             xaxis_range=[-1, 1],

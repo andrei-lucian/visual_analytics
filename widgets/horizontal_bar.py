@@ -212,7 +212,7 @@ class HorizontalBarPlot:
                 tickfont=dict(color="#083B6E", size=13),
                 title="Count",
             ),
-            font=dict(color="#083B6E", size=16),
+            font=dict(color="#083B6E", size=14),
             paper_bgcolor="#B9D3F6",
             plot_bgcolor="white",
             title_x=0.5,

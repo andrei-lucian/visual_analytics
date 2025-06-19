@@ -96,37 +96,20 @@ class WordCloudWidget:
         self.nlp = spacy.load("en_core_web_sm")
 
     def render_placeholder(self):
+
         return html.Div(
             style={
-                "flex": "1",  # allows it to take equal space in a flex column
-                "borderRadius": "8px",
-                "color": "#001f3f",
-                "fontStyle": "italic",
-                "fontSize": "1.1rem",
-                "margin": "0",
+                "height": "100%",
                 "backgroundColor": "#B9D3F6",
                 "display": "flex",
-                "flexWrap": "wrap",
                 "justifyContent": "center",
                 "alignItems": "center",
-                "gap": "6px",
-                "padding": "12px 16px",
-                "overflow": "auto",
+                "borderRadius": "8px",
             },
             children=[
-                dcc.Loading(
-                    id="loading-wordcloud",
-                    type="circle",
-                    children=html.Div(
-                        id="wordcloud-container",
-                        children=[
-                            html.Div(
-                                "Click on the heatmap to load",
-                                style={"marginBottom": "10px"},
-                            ),
-                        ],
-                    ),
-                ),
+                html.Div(
+                    "Click on heatmap to load", style={"fontSize": "1.1rem", "fontStyle": "italic", "color": "#083B6E"}
+                )
             ],
         )
 
@@ -170,7 +153,7 @@ class WordCloudWidget:
         wordcloud_div = self.generate_phrase_tags(phrases_with_sentiment)
 
         return html.Div(
-            [
+            children=[
                 html.H3(
                     f"Key phrases about {entity} ({month}) in {source}",
                     style={
@@ -185,7 +168,12 @@ class WordCloudWidget:
                     },
                 ),
                 wordcloud_div,
-            ]
+            ],
+            style={
+                "height": "100%",  # let it fill parent's height
+                "display": "flex",
+                "flexDirection": "column",
+            },
         )
 
     def classify_sentiment(self, text, entity):
