@@ -224,18 +224,35 @@ class Heatmap:
         """
         if not clickData:
             return None
+
         try:
             point = clickData["points"][0]
             raw_month = point["x"]
-            source = point["y"]
+            source = str(point["y"])
             source, raw_month = self.map_abbr_to_full(source, raw_month)
-            match = self.df_links[
-                (self.df_links["company"] == self.company_name)
-                & (self.df_links["month"].astype(str) == raw_month)
-                & (self.df_links["_raw_source"] == source)
-            ]
-            if match.empty:
-                return None
-            return round(match["score"].mean(), 2)
-        except Exception:
+
+            if isinstance(raw_month, str):
+                month = raw_month[:7]  # assume format "YYYY-MM-DD" or "YYYY-MM"
+            elif hasattr(raw_month, "strftime"):  # datetime or Timestamp
+                month = raw_month.strftime("%Y-%m")
+            else:
+                month = str(raw_month)[:7]
+
+        except (KeyError, IndexError, TypeError) as e:
+            print("Error parsing clickData:", e)
+            return None
+
+        df = self.df_links[self.df_links["company"] == self.company_name].copy()
+        df["score"] = df["sentiment"].map(self.sentiment_score_map)
+        df["month"] = df["month"].dt.to_timestamp().dt.strftime("%Y-%m")
+        df["_raw_source"] = df["_raw_source"].astype(str)
+
+        df_heat = df.groupby(["month", "_raw_source"])["score"].mean().reset_index()
+        heatmap_data = df_heat.pivot(index="_raw_source", columns="month", values="score")
+
+        try:
+            score = heatmap_data.loc[source, month]
+            return None if pd.isna(score) else round(score, 3)
+        except KeyError as e:
+            print(f"Lookup failed. Source: '{source}', Month: '{month}' not found.")
             return None
